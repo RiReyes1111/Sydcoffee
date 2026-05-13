@@ -1,0 +1,1003 @@
+<?php
+session_start();
+
+header("Cache-Control: no-store, no-cache, must-revalidate, private");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+$loggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
+$userName = $loggedIn ? $_SESSION['name'] : '';
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SYD Coffee — Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <script>
+    window.addEventListener("pageshow", function(e) {
+      if (e.persisted) window.location.reload();
+    });
+  </script>
+  <style>
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:       #f8f5ef;
+      --cream-dark:  #ede8de;
+      --espresso:    #1e120a;
+      --brown-mid:   #4a3020;
+      --gold:        #c8973a;
+      --gold-light:  #e8b84b;
+      --white:       #ffffff;
+      --text-muted:  #7a6555;
+      --nav-h:       72px;
+      --radius-lg:   24px;
+      --radius-md:   14px;
+      --shadow:      0 8px 40px rgba(30,18,10,0.14);
+      --shadow-sm:   0 2px 12px rgba(30,18,10,0.08);
+      --ease:        0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--cream);
+      color: var(--espresso);
+      overflow-x: hidden;
+    }
+
+    img { display: block; max-width: 100%; }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      height: var(--nav-h);
+      padding: 0 6%;
+      display: flex;
+      align-items: center;
+      transition: background var(--ease), box-shadow var(--ease);
+    }
+
+    .navbar.scrolled {
+      background: rgba(248,245,239,0.97);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 2px 20px rgba(30,18,10,0.09);
+    }
+
+    .nav-logo-link { line-height: 0; flex-shrink: 0; }
+    .logo-nav { height: 46px; width: auto; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+      margin-left: 36px;
+    }
+
+    .nav-links a {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--white);
+      position: relative;
+      padding-bottom: 3px;
+      transition: color var(--ease);
+    }
+
+    .navbar.scrolled .nav-links a { color: var(--espresso); }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 1.5px;
+      background: var(--gold);
+      transition: width var(--ease);
+    }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-auth {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-user {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--white);
+      transition: color var(--ease);
+    }
+    .navbar.scrolled .nav-user { color: var(--brown-mid); }
+
+    .btn-nav {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 8px 22px;
+      border-radius: 30px;
+      transition: var(--ease);
+    }
+
+    /* transparent bg: white outlined button */
+    .btn-nav-login {
+      background: rgba(255,255,255,0.15);
+      color: var(--white);
+      border: 1.5px solid rgba(255,255,255,0.55);
+    }
+    .btn-nav-login:hover {
+      background: var(--white);
+      color: var(--espresso);
+    }
+
+    /* scrolled: solid dark button */
+    .navbar.scrolled .btn-nav-login {
+      background: var(--espresso);
+      color: var(--cream);
+      border-color: var(--espresso);
+    }
+    .navbar.scrolled .btn-nav-login:hover {
+      background: var(--brown-mid);
+      border-color: var(--brown-mid);
+    }
+
+    .btn-nav-logout {
+      background: transparent;
+      color: var(--white);
+      border: 1.5px solid rgba(255,255,255,0.35);
+    }
+    .btn-nav-logout:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.7);
+    }
+    .navbar.scrolled .btn-nav-logout {
+      color: var(--espresso);
+      border-color: rgba(30,18,10,0.25);
+    }
+    .navbar.scrolled .btn-nav-logout:hover {
+      background: var(--espresso);
+      color: var(--cream);
+      border-color: var(--espresso);
+    }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px;
+      margin-left: auto;
+      z-index: 10002;
+      background: none;
+      border: none;
+    }
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: var(--ease);
+    }
+    .navbar.scrolled .hamburger span { background: var(--espresso); }
+    .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* Mobile drawer */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--cream);
+      z-index: 10001;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--espresso);
+      text-decoration: none;
+    }
+    .mobile-menu a:hover { color: var(--gold); }
+    .mobile-menu .mobile-divider {
+      width: 40px; height: 1px;
+      background: var(--cream-dark);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--espresso);
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('images/Gallery\ photo4.jpg');
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.05);
+      transition: transform 8s ease-out;
+    }
+    .hero-bg.loaded { transform: scale(1); }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(15,8,3,0.65) 0%,
+        rgba(20,10,4,0.45) 60%,
+        rgba(20,10,4,0.65) 100%
+      );
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 24px;
+      max-width: 820px;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.3s forwards;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 7.5vw, 5.8rem);
+      font-weight: 400;
+      line-height: 1.08;
+      color: var(--white);
+      margin-bottom: 22px;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.5s forwards;
+    }
+    .hero-title em { font-style: italic; color: var(--gold-light); }
+
+    .hero-sub {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.75;
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.7s forwards;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.9s forwards;
+    }
+
+    .btn-primary {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      text-decoration: none;
+      padding: 14px 38px;
+      border-radius: 40px;
+      background: var(--gold);
+      color: var(--espresso);
+      border: 2px solid var(--gold);
+      transition: var(--ease);
+    }
+    .btn-primary:hover {
+      background: var(--gold-light);
+      border-color: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(200,151,58,0.40);
+    }
+
+    .btn-outline-white {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      text-decoration: none;
+      padding: 14px 38px;
+      border-radius: 40px;
+      background: transparent;
+      color: var(--white);
+      border: 2px solid rgba(255,255,255,0.45);
+      transition: var(--ease);
+    }
+    .btn-outline-white:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.85);
+      transform: translateY(-2px);
+    }
+
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 32px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeIn 1s 1.4s forwards;
+    }
+    .hero-scroll-hint span {
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(255,255,255,0.40);
+    }
+    .scroll-bar {
+      width: 1px; height: 38px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.50), transparent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ── SECTION WRAPPER ── */
+    .sec {
+      padding: 96px 6%;
+    }
+
+    .sec-label {
+      display: block;
+      text-align: center;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    .sec-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.9rem, 4vw, 2.9rem);
+      font-weight: 400;
+      text-align: center;
+      color: var(--espresso);
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+    .sec-title.on-dark { color: var(--white); }
+
+    .sec-desc {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      max-width: 540px;
+      margin: 0 auto 52px;
+    }
+    .sec-desc.on-dark { color: rgba(255,255,255,0.62); }
+
+    /* ── BEST SELLERS ── */
+    .bs-section { background: var(--cream); }
+
+    .bs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      max-width: 1060px;
+      margin: 0 auto;
+      align-items: end;
+    }
+
+    .bs-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: transform var(--ease);
+    }
+    .bs-card:hover { transform: translateY(-8px); }
+
+    .bs-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: -18px;
+      z-index: 1;
+      position: relative;
+    }
+    .bs-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .bs-card:hover .bs-img img { transform: scale(1.05); }
+
+    .bs-tag {
+      position: relative;
+      z-index: 2;
+      background: var(--espresso);
+      color: var(--cream);
+      padding: 10px 26px;
+      border-radius: 30px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      box-shadow: 0 4px 14px rgba(30,18,10,0.20);
+      white-space: nowrap;
+    }
+    .bs-card.featured .bs-tag {
+      background: var(--gold);
+      color: var(--espresso);
+    }
+    .bs-card.featured { transform: scale(1.06); }
+    .bs-card.featured:hover { transform: scale(1.06) translateY(-8px); }
+
+    .bs-text {
+      margin-top: 26px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      padding: 0 8px;
+    }
+
+    /* ── PROMOTIONS ── */
+    .promo-section {
+      background: var(--espresso);
+    }
+    .promo-section .sec-label { color: var(--gold-light); }
+
+    .promo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .promo-link { text-decoration: none; color: inherit; display: block; }
+
+    .promo-card {
+      background: rgba(255,255,255,0.055);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      text-align: center;
+      transition: var(--ease);
+    }
+    .promo-link:hover .promo-card {
+      border-color: rgba(200,151,58,0.45);
+      transform: translateY(-5px);
+      box-shadow: 0 14px 44px rgba(0,0,0,0.28);
+    }
+
+    .promo-badge {
+      display: inline-block;
+      font-size: 9px; font-weight: 800;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 20px;
+    }
+    .promo-link:nth-child(1) .promo-badge {
+      background: rgba(231,76,60,0.18);
+      color: #ff8878;
+      border: 1px solid rgba(231,76,60,0.30);
+    }
+    .promo-link:nth-child(2) .promo-badge {
+      background: rgba(200,151,58,0.18);
+      color: var(--gold-light);
+      border: 1px solid rgba(200,151,58,0.30);
+    }
+
+    .promo-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.55rem;
+      font-weight: 400;
+      color: var(--white);
+      letter-spacing: 0;
+      text-transform: none;
+      margin: 0;
+    }
+
+    .promo-when {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--gold-light);
+      background: rgba(200,151,58,0.12);
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin: 0;
+    }
+
+    .promo-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.75;
+      margin: 0;
+      max-width: 280px;
+    }
+
+    /* ── GALLERY ── */
+    .gallery-section { background: var(--cream-dark); }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .gallery-item {
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      aspect-ratio: 4/3;
+      box-shadow: var(--shadow-sm);
+    }
+    .gallery-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .gallery-item:hover img { transform: scale(1.07); }
+
+    /* ── BOOTH ── */
+    .booth-section {
+      position: relative;
+      overflow: hidden;
+    }
+    .booth-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('images/Bg.png');
+      background-size: cover;
+      background-position: center;
+    }
+    .booth-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(15,8,3,0.62);
+    }
+    .booth-inner {
+      position: relative;
+      z-index: 2;
+    }
+
+    .booth-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    .booth-item {
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      aspect-ratio: 4/3;
+      box-shadow: var(--shadow);
+    }
+    .booth-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .booth-item:hover img { transform: scale(1.05); }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      background: var(--espresso);
+      padding: 68px 6% 28px;
+    }
+
+    .footer-grid {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 56px;
+      padding-bottom: 44px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .footer-logo {
+      height: 52px; width: auto;
+      filter: brightness(0) invert(1);
+      opacity: 0.80;
+      margin-bottom: 14px;
+    }
+
+    .footer-tagline {
+      font-size: 13px;
+      color: rgba(248,245,239,0.40);
+      line-height: 1.8;
+      max-width: 240px;
+    }
+
+    .footer-col h4 {
+      font-size: 9px; font-weight: 800;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: rgba(248,245,239,0.50);
+      text-decoration: none;
+      display: inline-block;
+      transition: var(--ease);
+    }
+    .footer-links a:hover {
+      color: var(--cream);
+      transform: translateX(4px);
+    }
+
+    .footer-bottom {
+      max-width: 1080px;
+      margin: 24px auto 0;
+      text-align: center;
+    }
+    .footer-bottom p {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: rgba(248,245,239,0.22);
+    }
+
+    /* ── REVEAL ANIMATIONS ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .delay-1 { transition-delay: 0.10s; }
+    .delay-2 { transition-delay: 0.20s; }
+    .delay-3 { transition-delay: 0.30s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 0.4; } 50% { opacity: 1; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .footer-brand { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 768px) {
+      :root { --nav-h: 62px; }
+      .navbar { padding: 0 20px; }
+      .nav-links, .nav-auth { display: none !important; }
+      .hamburger { display: flex; }
+
+      .sec { padding: 72px 20px; }
+
+      .bs-grid {
+        grid-template-columns: 1fr;
+        max-width: 320px;
+        margin: 0 auto;
+        gap: 44px;
+      }
+      .bs-card.featured { transform: scale(1); }
+      .bs-card.featured:hover { transform: translateY(-8px); }
+
+      .promo-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .gallery-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+      .booth-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        text-align: center;
+      }
+      .footer-tagline { margin: 0 auto; max-width: 100%; }
+      .footer-logo { margin: 0 auto 14px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title { font-size: 2.4rem; }
+      .btn-primary, .btn-outline-white { padding: 12px 26px; font-size: 10px; }
+      .gallery-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (min-width: 1400px) {
+      .bs-grid { max-width: 1200px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar" id="navbar">
+  <a href="index.php" class="nav-logo-link">
+    <img src="images/logosydnobg.png" alt="SYD Coffee" class="logo-nav">
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="index.php">Home</a></li>
+    <li><a href="menu.php">Menu</a></li>
+    <li><a href="about.php">About</a></li>
+    <li><a href="contact.php">Contact</a></li>
+  </ul>
+
+  <div class="nav-auth">
+    <?php if ($loggedIn): ?>
+      <span class="nav-user">Hi, <?= htmlspecialchars($userName) ?>!</span>
+      <a href="logout.php" class="btn-nav btn-nav-logout">Logout</a>
+    <?php else: ?>
+      <a href="login.php" class="btn-nav btn-nav-login">Login</a>
+    <?php endif; ?>
+  </div>
+
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.php">Home</a>
+  <a href="menu.php">Menu</a>
+  <a href="about.php">About</a>
+  <a href="contact.php">Contact</a>
+  <div class="mobile-divider"></div>
+  <?php if ($loggedIn): ?>
+    <span class="nav-user" style="color:var(--brown-mid)">Hi, <?= htmlspecialchars($userName) ?>!</span>
+    <a href="logout.php">Logout</a>
+  <?php else: ?>
+    <a href="login.php">Login</a>
+  <?php endif; ?>
+</div>
+
+<!-- ── HERO ── -->
+<section class="hero" id="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">Handcrafted with passion</span>
+    <h1 class="hero-title">Every cup tells<br><em>a story</em></h1>
+    <p class="hero-sub">Premium coffee, carefully sourced and brewed to perfection —<br>served wherever you find us.</p>
+    <div class="hero-btns">
+      <a href="menu.php" class="btn-primary">Explore Menu</a>
+      <a href="about.php" class="btn-outline-white">Our Story</a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">
+    <div class="scroll-bar"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ── BEST SELLERS ── -->
+<section class="sec bs-section" id="best-sellers-section">
+  <span class="sec-label reveal">Fan Favourites</span>
+  <h2 class="sec-title reveal delay-1">Best Sellers</h2>
+  <p class="sec-desc reveal delay-2">The drinks our customers keep coming back for — crafted to delight, every single time.</p>
+
+  <div class="bs-grid">
+    <div class="bs-card reveal delay-1">
+      <div class="bs-img">
+        <img src="images/spanish-latte.jpg" alt="Spanish Latte" loading="lazy">
+      </div>
+      <span class="bs-tag">Spanish Latte</span>
+      <p class="bs-text">A velvety blend of espresso and milk with a hint of caramelized sugar.</p>
+    </div>
+
+    <div class="bs-card featured reveal delay-2">
+      <div class="bs-img">
+        <img src="images/caramel-macchiato.jpg" alt="Caramel Macchiato" loading="lazy">
+      </div>
+      <span class="bs-tag">Caramel Macchiato</span>
+      <p class="bs-text">Bold and indulgent with a silky finish — a layered blend of espresso and caramel.</p>
+    </div>
+
+    <div class="bs-card reveal delay-3">
+      <div class="bs-img">
+        <img src="images/matcha-latte.jpg" alt="Matcha Latte" loading="lazy">
+      </div>
+      <span class="bs-tag">Matcha Latte</span>
+      <p class="bs-text">Earthy and refreshing with a creamy finish — a smooth blend of matcha and milk.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROMOTIONS ── -->
+<section class="sec promo-section" id="promotions">
+  <span class="sec-label reveal">Special Offers</span>
+  <h2 class="sec-title on-dark reveal delay-1">Current Promotions</h2>
+  <p class="sec-desc on-dark reveal delay-2">Enjoy these exclusive deals — sign up for a free account to unlock member benefits.</p>
+
+  <div class="promo-grid">
+    <a href="<?= $loggedIn ? 'menu.php' : 'login.php' ?>" class="promo-link reveal delay-1">
+      <div class="promo-card">
+        <div class="promo-badge">Limited Time</div>
+        <h3>Happy Hour</h3>
+        <p class="promo-when">3PM – 5PM Daily</p>
+        <p class="promo-desc">Extra 10% off all cold drinks during happy hour — 20% total for members!</p>
+      </div>
+    </a>
+
+    <a href="<?= $loggedIn ? 'menu.php' : 'login.php' ?>" class="promo-link reveal delay-2">
+      <div class="promo-card">
+        <div class="promo-badge">Members Only</div>
+        <h3>Member Discount</h3>
+        <p class="promo-when">Free to join</p>
+        <p class="promo-desc">Get 10% off on all drinks just by signing up for a free account!</p>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ── GALLERY ── -->
+<section class="sec gallery-section" id="gallery">
+  <span class="sec-label reveal">Behind the Brew</span>
+  <h2 class="sec-title reveal delay-1">Gallery</h2>
+  <p class="sec-desc reveal delay-2">A glimpse at our favourite moments — from pop-ups to community events.</p>
+
+  <div class="gallery-grid">
+    <div class="gallery-item reveal delay-1">
+      <img src="images/Gallery photo1.jpg" alt="Gallery 1" loading="lazy">
+    </div>
+    <div class="gallery-item reveal delay-2">
+      <img src="images/Gallery photo2.jpg" alt="Gallery 2" loading="lazy">
+    </div>
+    <div class="gallery-item reveal delay-3">
+      <img src="images/Gallery photo3.jpg" alt="Gallery 3" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- ── BOOTH ── -->
+<section class="sec booth-section" id="booth">
+  <div class="booth-bg"></div>
+  <div class="booth-inner">
+    <span class="sec-label reveal" style="color:var(--gold-light)">Find Us</span>
+    <h2 class="sec-title on-dark reveal delay-1">Our Coffee Booth</h2>
+    <p class="sec-desc on-dark reveal delay-2">We bring SYD Coffee wherever we go — from local events to community pop-ups.</p>
+
+    <div class="booth-grid">
+      <div class="booth-item reveal delay-1">
+        <img src="images/booth1.jpg" alt="Coffee Booth 1" loading="lazy">
+      </div>
+      <div class="booth-item reveal delay-2">
+        <img src="images/booth2.jpg" alt="Coffee Booth 2" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <img src="images/logosydnobg.png" alt="SYD Coffee" class="footer-logo">
+      <p class="footer-tagline">Handcrafted coffee served with care — wherever you find us.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <ul class="footer-links">
+        <li><a href="index.php">Home</a></li>
+        <li><a href="menu.php">Menu</a></li>
+        <li><a href="about.php">About</a></li>
+        <li><a href="contact.php">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Connect</h4>
+      <ul class="footer-links">
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">Facebook</a></li>
+        <li><a href="mailto:hello@sydcoffee.com">hello@sydcoffee.com</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 SYD Coffee</p>
+  </div>
+</footer>
+
+<script>
+  // Hero bg load
+  window.addEventListener('load', function() {
+    document.getElementById('heroBg').classList.add('loaded');
+  });
+
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', function() {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  }, { passive: true });
+
+  // Hamburger — toggles mobile menu, NOT nav-links
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  hamburger.addEventListener('click', function() {
+    const open = mobileMenu.classList.toggle('open');
+    hamburger.classList.toggle('active', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+    // always show hamburger as dark when menu is open
+    if (open) navbar.classList.add('scrolled');
+    else if (window.scrollY <= 50) navbar.classList.remove('scrolled');
+  });
+
+  mobileMenu.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      mobileMenu.classList.remove('open');
+      hamburger.classList.remove('active');
+      document.body.style.overflow = '';
+      if (window.scrollY <= 50) navbar.classList.remove('scrolled');
+    });
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.10 });
+  document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+</script>
+</body>
+</html>
