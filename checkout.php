@@ -228,7 +228,7 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
       <div class="card-head">
         <div class="card-head-icon">&#9679;</div>
         <div>
-          <h3>Order Summary</h3>
+          <h3>Order summary</h3>
           <div class="card-sub" id="summaryItemCount">—</div>
         </div>
       </div>
