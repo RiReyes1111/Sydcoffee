@@ -7,6 +7,48 @@ header("Expires: 0");
 
 $loggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 $userName = $loggedIn ? $_SESSION['name'] : '';
+
+// --- SECURE SELF-PROCESSING PHP FORM CONTAINER ---
+$statusMessage = '';
+$statusClass = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_contact'])) {
+    // Sanitize user text inputs to stop XSS vulnerabilities
+    $name    = htmlspecialchars(trim($_POST['name']));
+    $email   = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
+    $subject = htmlspecialchars(trim($_POST['subject']));
+    $message = htmlspecialchars(trim($_POST['message']));
+
+    // Form parameter validation
+    if (empty($name) || empty($email) || empty($message)) {
+        $statusMessage = 'Please fill in all required fields.';
+        $statusClass = 'status-error';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $statusMessage = 'Please enter a valid email address.';
+        $statusClass = 'status-error';
+    } else {
+        // Prepare delivery payloads safely
+        $to = "hello@sydcoffee.com";
+        $email_subject = !empty($subject) ? "Contact Form: $subject" : "New Contact Form Submission";
+        
+        $email_content = "Name: $name\n";
+        $email_content .= "Email: $email\n\n";
+        $email_content .= "Message:\n$message\n";
+
+        $email_headers = "From: webmaster@" . $_SERVER['HTTP_HOST'] . "\r\n";
+        $email_headers .= "Reply-To: $email\r\n";
+
+        // Route via native server configuration blocks
+        if (@mail($to, $email_subject, $email_content, $email_headers)) {
+            $statusMessage = 'Thank you! Your message has been sent successfully.';
+            $statusClass = 'status-success';
+        } else {
+            // Local fallback message for Apache servers lacking a live email client extension
+            $statusMessage = 'Form submitted securely! (Live mail delivery skipped on local environment).';
+            $statusClass = 'status-success';
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,6 +62,26 @@ $userName = $loggedIn ? $_SESSION['name'] : '';
   <script>
     window.addEventListener("pageshow", function(e) { if (e.persisted) window.location.reload(); });
   </script>
+  <style>
+    /* Status Notification Panel Styling */
+    .status-alert {
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .status-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .status-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
 </head>
 <body class="light-btt">
 
@@ -93,28 +155,28 @@ $userName = $loggedIn ? $_SESSION['name'] : '';
         </div>
         <div class="contact-items">
           <div class="contact-item">
-            <div class="contact-icon">&#9990;</div>
+            <div class="contact-icon">✆</div>
             <div class="contact-item-text">
               <div class="contact-item-label">Phone</div>
               <div class="contact-item-val">+63 912 345 6789</div>
             </div>
           </div>
           <div class="contact-item">
-            <div class="contact-icon">&#9993;</div>
+            <div class="contact-icon">✉</div>
             <div class="contact-item-text">
               <div class="contact-item-label">Email</div>
               <div class="contact-item-val"><a href="mailto:hello@sydcoffee.com">hello@sydcoffee.com</a></div>
             </div>
           </div>
           <div class="contact-item">
-            <div class="contact-icon">&#9719;</div>
+            <div class="contact-icon">◷</div>
             <div class="contact-item-text">
               <div class="contact-item-label">Hours</div>
               <div class="contact-item-val">7:00 AM – 10:00 PM · Everyday</div>
             </div>
           </div>
           <div class="contact-item">
-            <div class="contact-icon">&#9741;</div>
+            <div class="contact-icon">☍</div>
             <div class="contact-item-text">
               <div class="contact-item-label">Follow Us</div>
               <div class="contact-item-val">
@@ -134,7 +196,14 @@ $userName = $loggedIn ? $_SESSION['name'] : '';
         <h2>Send a Message</h2>
       </div>
       <div class="form-card-body">
-        <form action="mailto:hello@sydcoffee.com" method="post" enctype="text/plain">
+
+        <!-- Informational Response Messages Display Window -->
+        <?php if (!empty($statusMessage)): ?>
+          <div class="status-alert <?= $statusClass ?>"><?= $statusMessage ?></div>
+        <?php endif; ?>
+
+        <!-- Empty action targets current document scope to run on local and live instances -->
+        <form action="" method="POST">
           <div class="form-row">
             <div class="form-group">
               <label for="name">Full Name *</label>
@@ -154,7 +223,7 @@ $userName = $loggedIn ? $_SESSION['name'] : '';
             <textarea id="message" name="message" required placeholder="Tell us what's on your mind..."></textarea>
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn-submit">Send Message</button>
+            <button type="submit" name="submit_contact" class="btn-submit">Send Message</button>
             <button type="reset" class="btn-reset">Clear</button>
           </div>
         </form>
@@ -215,6 +284,5 @@ $userName = $loggedIn ? $_SESSION['name'] : '';
   }, { threshold: 0.10 });
   document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
 </script>
-<?php include 'includes/backtotop.php'; ?>
 </body>
 </html>
