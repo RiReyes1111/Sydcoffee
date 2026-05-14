@@ -370,7 +370,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
     </div>
 </div>
     
-    <a href="index.php" class="go-back-btn">← Go Back</a>
+  <a href="../index.php" class="go-back-btn">← Go Back</a>
 
 <script>
 function updateClock(){
