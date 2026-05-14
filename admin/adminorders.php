@@ -215,6 +215,19 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
     .topbar{padding:14px 16px;}
     .order-customer{margin-left:0;width:100%;}
     .topbar-right{gap:6px;}
+
+    
+    .order-foot{
+        align-items:center;
+    }
+
+    .order-foot form{
+        margin:0;
+    }
+
+    .order-foot form:last-child{
+        margin-left:auto !important;
+    }
 }
 </style>
 </head>
