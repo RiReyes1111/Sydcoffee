@@ -20,8 +20,44 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>SYD Coffee — Checkout</title>
 <link rel="icon" type="image/png" href="images/logosydnobg.png">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="googleapis.com" rel="stylesheet">
 <link rel="stylesheet" href="css/checkoutcss.css">
+<style>
+.summary-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+}
+.item-title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.item-main-name {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111;
+}
+.item-meta-spec {
+  display: inline-block;
+  background-color: #f5f0eb;
+  color: #8c6239;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+.item-price-display {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111;
+  text-align: right;
+}
+</style>
 </head>
 <body>
 
@@ -37,11 +73,11 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
   <?php if ($isUser): ?>
     <span class="topbar-user"><?= htmlspecialchars($userName) ?></span>
   <?php endif; ?>
-  <a href="menu.php" class="btn-back-nav">&#8592; Menu</a>
+  <a href="menu.php" class="btn-back-nav">← Menu</a>
 </div>
 
 <div class="success-screen" id="successScreen">
-  <div class="success-icon">&#10003;</div>
+  <div class="success-icon">✓</div>
   <h2>Order Placed!</h2>
   <p>Thank you<?= $isUser ? ', <strong>' . htmlspecialchars($userName) . '</strong>' : '' ?>!<br>We'll have your order ready soon. You'll hear from us shortly.</p>
   <a href="menu.php" class="btn-back-menu">Back to Menu</a>
@@ -84,7 +120,7 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
 
     <div class="card">
       <div class="card-head">
-        <div class="card-head-icon">&#9679;</div>
+        <div class="card-head-icon">●</div>
         <div>
           <h3>Fulfillment</h3>
           <div class="card-sub">How would you like to receive your order?</div>
@@ -96,11 +132,11 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
       </div>
       <div id="pickupInfo" class="show">
         <div class="address-box">
-          <strong>SYD Coffee</strong>
+          <strong>SYD Coffee</strong><br>
           Greenrose Subdivision, Rodriguez, Rizal 1860, Philippines
         </div>
         <iframe class="map-frame"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3864.12!2d121.13!3d14.74!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b9b1234abcd%3A0x0!2sGreenrose+Subdivision%2C+Rodriguez%2C+Rizal!5e0!3m2!1sen!2sph!4v1715000000000!5m2!1sen!2sph"
+          src="google.com"
           allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
         </iframe>
       </div>
@@ -122,7 +158,7 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
 
     <div class="card">
       <div class="card-head">
-        <div class="card-head-icon">&#9679;</div>
+        <div class="card-head-icon">●</div>
         <div>
           <h3>Payment Method</h3>
           <div class="card-sub">Choose how you'd like to pay</div>
@@ -187,262 +223,231 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
               <div class="field-group">
                 <label class="field-label">Expiry Date</label>
                 <div class="card-input-wrap">
-                  <input type="text" id="cardExpiry" placeholder="MM / YY"
-                    maxlength="7" inputmode="numeric"
-                    oninput="formatExpiry(this)" autocomplete="cc-exp">
+                  <input type="text" id="cardExpiry" placeholder="MM / YY" maxlength="5" oninput="formatExpiry(this)">
                 </div>
               </div>
               <div class="field-group">
                 <label class="field-label">CVV</label>
                 <div class="card-input-wrap">
-                  <input type="text" id="cardCvv" placeholder="&bull;&bull;&bull;"
-                    maxlength="4" inputmode="numeric"
-                    oninput="this.value=this.value.replace(/\D/g,'')"
-                    onfocus="flipCard(true)" onblur="flipCard(false)"
-                    autocomplete="cc-csc">
+                  <input type="password" id="cardCvv" placeholder="123" maxlength="3">
                 </div>
               </div>
             </div>
-            <p class="pay-note" style="margin-top:4px;">
-              Card details are used for payment processing only. Your information is secure.
-            </p>
           </div>
         </div>
       </div>
-
+      
       <div id="cashInfo">
-        <div class="pay-panel cash">
-          <span class="pay-panel-label">Cash on Hand</span>
-          <div class="cash-body">
-            <p>Pay with cash when you pick up or when we deliver.</p>
-            <p>Please prepare the exact amount if possible.</p>
-          </div>
+        <div class="pay-panel">
+          <p class="pay-note">Please prepare exact change upon collection or delivery to expedite fulfillment.</p>
         </div>
       </div>
-    </div>
 
+    </div>
   </div>
 
-  <div class="order-panel">
-    <div class="card">
-      <div class="card-head">
-        <div class="card-head-icon">&#9679;</div>
-        <div>
-          <h3>Order summary</h3>
-          <div class="card-sub" id="summaryItemCount">—</div>
+  <div class="summary-col">
+    <div class="sticky-summary">
+      <div class="card">
+        <div class="card-head" style="margin-bottom:20px;">
+          <div class="card-head-icon" style="color: var(--brown-mid, #6f4e37);">●</div>
+          <div>
+            <h3 style="margin:0; font-size:1.1rem; font-weight:700;">Order summary</h3>
+            <div class="card-sub" id="summaryCount" style="font-size:0.85rem; color:#666;">0 items</div>
+          </div>
         </div>
-      </div>
-      <div class="order-summary-items" id="summaryItems"></div>
-      <div class="order-totals">
-        <div class="total-row"><span>Subtotal</span><span id="subtotalDisplay">&#8369;0.00</span></div>
-        <?php if ($isUser): ?>
-        <div class="total-row discount">
-          <span id="discountLabel">Member Discount (10%)</span>
-          <span id="discountDisplay"></span>
+
+        <div class="summary-items" id="summaryItemsList" style="border-bottom: 1px solid #eee; padding-bottom:15px; margin-bottom:15px;"></div>
+
+        <div class="summary-totals" style="margin-bottom: 20px;">
+          <div class="total-row" style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.95rem; color:#666;">
+            <span>Subtotal</span>
+            <span id="txtSubtotal" style="font-weight:600;">₱0.00</span>
+          </div>
+          
+          <?php if ($isUser): ?>
+          <div class="total-row discount-row" id="discountDisplayRow" style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.95rem; color: #28a745; font-weight:500;">
+            <span>Member Discount (10%)</span>
+            <span id="txtDiscount">-₱0.00 saved</span>
+          </div>
+          <?php endif; ?>
+
+          <div class="total-row" id="deliveryFeeRow" style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:0.95rem; color:#666;">
+            <span>Fulfillment Fee</span>
+            <span id="txtFee" style="font-weight:600;">₱0.00</span>
+          </div>
+          
+          <div class="total-row grand-total" style="display:flex; justify-content:space-between; border-top: 2px solid #222; padding-top:15px; font-size:1.2rem; color:#111;">
+            <span style="font-weight:700;">Total</span>
+            <span id="txtTotal" style="font-weight:800;">₱0.00</span>
+          </div>
         </div>
-        <?php endif; ?>
-        <div class="total-row delivery" id="deliveryFeeRow" style="display:none;"><span>Delivery Fee</span><span>&#8369;40.00</span></div>
-        <div class="total-row grand"><span>Total</span><span id="grandTotalDisplay">&#8369;0.00</span></div>
+
+        <button class="btn-place-order" onclick="submitOrder()" style="width:100%; background:#111; color:#fff; border:none; padding:15px; font-weight:700; font-size:1rem; border-radius:30px; cursor:pointer; letter-spacing:1px; text-transform:uppercase; transition: background 0.2s;">
+          PLACE ORDER →
+        </button>
+        <div class="secure-footer" style="text-align:center; font-size:0.8rem; color:#888; margin-top:12px;">Secure checkout · No hidden fees</div>
       </div>
-      <button class="btn-place-order" id="placeOrderBtn" onclick="placeOrder()">Place Order &rarr;</button>
-      <div class="error-msg" id="errorMsg"></div>
-      <p class="order-guarantee">Secure checkout &nbsp;&middot;&nbsp; No hidden fees</p>
     </div>
   </div>
 
 </div>
 
 <script>
-const IS_MEMBER     = <?= $isUser ? 'true' : 'false' ?>;
-const IS_HAPPY_HOUR = <?= ($isUser && $isHappyHour) ? 'true' : 'false' ?>;
-const PLACE_ORDER_URL = '<?= rtrim(dirname($_SERVER['PHP_SELF']), '/') . '/place_order.php' ?>';
+let currentFulfillment = 'pickup';
+let currentPayment = 'gcash';
+const isMember = <?= $isUser ? 'true' : 'false' ?>;
 
-function loadCart() {
-  try {
-    const raw = JSON.parse(localStorage.getItem('sydCart') || '[]');
-    return raw.filter(i => i && typeof i.name === 'string' && i.name.trim()
-      && typeof i.size === 'string' && i.size.trim()
-      && !isNaN(parseFloat(i.price)) && parseFloat(i.price) > 0 && i.qty > 0)
-      .map(i => ({ ...i, price: parseFloat(i.price), qty: parseInt(i.qty) }));
-  } catch(e) { return []; }
+let cart = JSON.parse(localStorage.getItem('cart')) || [
+    { id: 1, name: 'Cafe Americano', size: 'LARGE', quantity: 1, price: 85.50 }
+];
+
+function initOrderSummary() {
+    const listContainer = document.getElementById('summaryItemsList');
+    if(!listContainer) return;
+    
+    listContainer.innerHTML = '';
+    let itemizedSubtotal = 0;
+    let actualDiscountTotal = 0;
+    let itemCount = 0;
+
+    cart.forEach(item => {
+        let baseLineRowPrice = item.price * item.quantity;
+        itemizedSubtotal += baseLineRowPrice;
+        itemCount += item.quantity;
+
+        let calculatedRowDiscount = isMember ? (baseLineRowPrice * 0.10) : 0;
+        actualDiscountTotal += calculatedRowDiscount;
+        let finalRowPriceDisplay = baseLineRowPrice - calculatedRowDiscount;
+
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'summary-item-row';
+        itemDiv.innerHTML = `
+            <div class="item-title-box">
+                <div class="item-main-name">${item.name}</div>
+                <div>
+                    <span class="item-meta-spec">${item.size}</span>
+                    <span style="font-size: 0.8rem; color: #777; margin-left: 4px;">× ${item.quantity}</span>
+                </div>
+            </div>
+            <div class="item-price-display">₱${finalRowPriceDisplay.toFixed(2)}</div>
+        `;
+        listContainer.appendChild(itemDiv);
+    });
+
+    document.getElementById('summaryCount').innerText = `${itemCount} item${itemCount !== 1 ? 's' : ''}`;
+    calculateFinalTotals(itemizedSubtotal, actualDiscountTotal);
 }
 
-const cart = loadCart();
-let fulfillment = 'pickup';
-let payment = 'gcash';
+function calculateFinalTotals(subtotal, discount) {
+    let fee = (currentFulfillment === 'delivery') ? 50.00 : 0.00;
+    
+    // MATHEMATICAL MATH CORRECTION: Subtract the discount before adding the delivery fee variable
+    let finalTotal = (subtotal - discount) + fee;
 
-function showError(msg) {
-  const el = document.getElementById('errorMsg');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-
-function clearError() {
-  const el = document.getElementById('errorMsg');
-  el.textContent = '';
-  el.classList.remove('show');
-}
-
-function renderSummary() {
-  const container = document.getElementById('summaryItems');
-  const countEl   = document.getElementById('summaryItemCount');
-  if (!cart.length) {
-    container.innerHTML = '<p style="color:var(--text-muted);font-size:13px;padding:10px 0;">Your cart is empty. <a href="menu.php" style="color:var(--gold);font-weight:700;">Go back to menu</a></p>';
-    updateTotals(0);
-    countEl.textContent = 'No items';
-    document.getElementById('placeOrderBtn').disabled = true;
-    return;
-  }
-  let subtotal = 0, totalQty = 0;
-  container.innerHTML = cart.map(item => {
-    const sub = item.price * item.qty;
-    subtotal += sub; totalQty += item.qty;
-    return `<div class="order-item">
-      <div class="order-item-left">
-        <div class="order-item-name">${item.name}</div>
-        <div class="order-item-meta">
-          <span class="order-item-badge">${item.size}</span>
-          <span class="order-item-qty">&times; ${item.qty}</span>
-        </div>
-      </div>
-      <div class="order-item-price">\u20B1${sub.toFixed(2)}</div>
-    </div>`;
-  }).join('');
-  countEl.textContent = totalQty + (totalQty === 1 ? ' item' : ' items');
-  updateTotals(subtotal);
-}
-
-function updateTotals(subtotal) {
-  const deliveryFee = fulfillment === 'delivery' ? 40 : 0;
-  const grand = subtotal + deliveryFee;
-  document.getElementById('subtotalDisplay').textContent   = '\u20B1' + subtotal.toFixed(2);
-  document.getElementById('grandTotalDisplay').textContent = '\u20B1' + grand.toFixed(2);
-  if (IS_MEMBER) {
-    const rate    = IS_HAPPY_HOUR ? 0.20 : 0.10;
-    const savings = subtotal * (rate / (1 - rate));
-    const label   = IS_HAPPY_HOUR ? 'Happy Hour (up to 20%)' : 'Member Discount (10%)';
-    document.getElementById('discountLabel').textContent   = label;
-    document.getElementById('discountDisplay').textContent = '-\u20B1' + savings.toFixed(2) + ' saved';
-  }
-}
-
-function recalcTotals() {
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  updateTotals(subtotal);
+    document.getElementById('txtSubtotal').innerText = `₱${subtotal.toFixed(2)}`;
+    if (isMember) {
+        document.getElementById('txtDiscount').innerText = `-₱${discount.toFixed(2)} saved`;
+    }
+    document.getElementById('txtFee').innerText = `₱${fee.toFixed(2)}`;
+    document.getElementById('txtTotal').innerText = `₱${finalTotal.toFixed(2)}`;
 }
 
 function setFulfillment(type) {
-  fulfillment = type;
-  document.getElementById('pickupInfo').classList.toggle('show', type === 'pickup');
-  document.getElementById('deliveryInfo').classList.toggle('show', type === 'delivery');
-  document.getElementById('btnPickup').classList.toggle('active', type === 'pickup');
-  document.getElementById('btnDelivery').classList.toggle('active', type === 'delivery');
-  document.getElementById('deliveryFeeRow').style.display = type === 'delivery' ? 'flex' : 'none';
-  recalcTotals();
+    currentFulfillment = type;
+    document.getElementById('btnPickup').classList.toggle('active', type === 'pickup');
+    document.getElementById('btnDelivery').classList.toggle('active', type === 'delivery');
+    
+    document.getElementById('pickupInfo').classList.toggle('show', type === 'pickup');
+    document.getElementById('deliveryInfo').classList.toggle('show', type === 'delivery');
+    
+    initOrderSummary();
 }
 
-function setPayment(type) {
-  payment = type;
-  ['gcash','visa','cash'].forEach(t => {
-    document.getElementById(t + 'Info').classList.toggle('show', t === type);
-    const key = 'btn' + t.charAt(0).toUpperCase() + t.slice(1);
-    document.getElementById(key).classList.toggle('active', t === type);
-  });
+function setPayment(method) {
+    currentPayment = method;
+    document.getElementById('btnGcash').classList.toggle('active', method === 'gcash');
+    document.getElementById('btnVisa').classList.toggle('active', method === 'visa');
+    document.getElementById('btnCash').classList.toggle('active', method === 'cash');
+    
+    document.getElementById('gcashInfo').classList.toggle('show', method === 'gcash');
+    document.getElementById('visaInfo').classList.toggle('show', method === 'visa');
+    document.getElementById('cashInfo').classList.toggle('show', method === 'cash');
 }
-
-function placeOrder() {
-  clearError();
-  if (!cart.length) { showError('Your cart is empty.'); return; }
-
-  let deliveryAddress = '', contactNumber = '', specialNotes = '';
-  if (fulfillment === 'delivery') {
-    deliveryAddress = document.getElementById('deliveryAddress').value.trim();
-    contactNumber   = document.getElementById('contactNumber').value.trim();
-    specialNotes    = document.getElementById('specialNotes').value.trim();
-    if (!deliveryAddress) { showError('Please enter your delivery address.'); return; }
-    if (!contactNumber)   { showError('Please enter your contact number.');   return; }
-  }
-
-  const subtotal    = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const deliveryFee = fulfillment === 'delivery' ? 40 : 0;
-  const total       = subtotal + deliveryFee;
-
-  const payload = {
-    items: cart,
-    subtotal: parseFloat(subtotal.toFixed(2)),
-    delivery_fee: deliveryFee,
-    total: parseFloat(total.toFixed(2)),
-    fulfillment,
-    payment_method: payment,
-    delivery_address: deliveryAddress,
-    contact_number: contactNumber,
-    special_notes: specialNotes
-  };
-
-  const btn = document.getElementById('placeOrderBtn');
-  btn.disabled = true;
-  btn.textContent = 'Placing Order...';
-
-  fetch(PLACE_ORDER_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  .then(r => {
-    if (!r.ok) throw new Error('Server returned ' + r.status);
-    return r.json();
-  })
-  .then(data => {
-    if (data.success) {
-      localStorage.removeItem('sydCart');
-      document.getElementById('checkoutForm').style.display = 'none';
-      document.getElementById('successScreen').classList.add('show');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      showError('Something went wrong: ' + (data.message || 'Unknown error'));
-      btn.disabled = false;
-      btn.textContent = 'Place Order \u2192';
-    }
-  })
-  .catch(err => {
-    showError('Could not reach the server. Check your connection and try again. (' + err.message + ')');
-    btn.disabled = false;
-    btn.textContent = 'Place Order \u2192';
-  });
-}
-
-renderSummary();
 
 function formatCardNumber(input) {
-  let val = input.value.replace(/\D/g, '').substring(0, 16);
-  input.value = val.replace(/(.{4})/g, '$1 ').trim();
-  const display = val.padEnd(16, '\u2022').replace(/(.{4})/g, '$1 ').trim();
-  document.getElementById('previewNumber').textContent = display;
-  const brand = document.getElementById('previewBrand');
-  if      (/^4/.test(val))      brand.textContent = 'VISA';
-  else if (/^5[1-5]/.test(val)) brand.textContent = 'MASTERCARD';
-  else if (/^3[47]/.test(val))  brand.textContent = 'AMEX';
-  else                           brand.textContent = 'VISA';
+    let v = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    let matches = v.match(/\d{4,16}/g);
+    let match = matches && matches || '';
+    let parts = [];
+
+    for (let i=0, len=match.length; i<len; i+=4) {
+        parts.push(match.substring(i, i+4));
+    }
+
+    if (parts.length > 0) {
+        input.value = parts.join(' ');
+    } else {
+        input.value = v;
+    }
+    document.getElementById('previewNumber').innerText = input.value || '•••• •••• •••• ••••';
 }
 
 function updatePreviewName(val) {
-  document.getElementById('previewName').textContent = val.trim().toUpperCase() || 'YOUR NAME';
+    document.getElementById('previewName').innerText = val.toUpperCase() || 'YOUR NAME';
 }
 
 function formatExpiry(input) {
-  let val = input.value.replace(/\D/g, '').substring(0, 4);
-  if (val.length >= 3) val = val.substring(0,2) + ' / ' + val.substring(2);
-  input.value = val;
-  document.getElementById('previewExpiry').textContent = val || 'MM / YY';
+    let v = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    if (v.length >= 2) {
+        input.value = v.substring(0, 2) + ' / ' + v.substring(2, 4);
+    } else {
+        input.value = v;
+    }
+    document.getElementById('previewExpiry').innerText = input.value || 'MM / YY';
 }
 
-function flipCard(isCvv) {
-  const preview = document.getElementById('cardPreview');
-  if (preview) {
-    preview.style.filter = isCvv ? 'brightness(0.75)' : 'brightness(1)';
-    preview.style.transition = 'filter 0.3s ease';
-  }
+async function submitOrder() {
+    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    let fee = (currentFulfillment === 'delivery') ? 50.00 : 0.00;
+
+    let payload = {
+        items: cart,
+        subtotal: subtotal,
+        delivery_fee: fee,
+        fulfillment: currentFulfillment,
+        payment_method: currentPayment,
+        delivery_address: document.getElementById('deliveryAddress')?.value || '',
+        contact_number: document.getElementById('contactNumber')?.value || '',
+        special_notes: document.getElementById('specialNotes')?.value || ''
+    };
+
+    if (currentFulfillment === 'delivery' && (!payload.delivery_address || !payload.contact_number)) {
+        alert("Please complete the delivery form fields parameters.");
+        return;
+    }
+
+    try {
+        let response = await fetch('place_order.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        let result = await response.json();
+        if (result.success) {
+            localStorage.removeItem('cart');
+            document.getElementById('checkoutForm').style.display = 'none';
+            document.getElementById('successScreen').style.display = 'block';
+        } else {
+            alert("Error placing order: " + result.message);
+        }
+    } catch(err) {
+        alert("Network communication operational error.");
+    }
 }
+
+window.addEventListener('DOMContentLoaded', initOrderSummary);
 </script>
 </body>
 </html>
