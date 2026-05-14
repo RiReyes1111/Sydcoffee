@@ -1,6 +1,6 @@
 <?php
 $host = getenv('DB_HOST') ?: 'turntable.proxy.rlwy.net';
-$port = getenv('DB_PORT') ?: '41685';
+$port = (int)(getenv('DB_PORT') ?: 41685);
 $dbname = getenv('DB_NAME') ?: 'railway';
 $username = getenv('DB_USER') ?: 'root';
 $password = getenv('DB_PASS') ?: 'itNBYATxTbQnJsCqApUXObUVFdEulyZH';
