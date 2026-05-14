@@ -1,4 +1,5 @@
 <?php
+  date_default_timezone_set('Asia/Manila');
   session_start();
   include "auth/config.php";
 
@@ -14,7 +15,7 @@
   $isAdmin = ($loggedIn && $userRole === 'admin');
 
   $currentHour = (int)date('H');
-  $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
+  $isHappyHour = ($currentHour >= 20 && $currentHour < 23);
 
   $discount     = 0.10;
   $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
