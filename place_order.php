@@ -20,13 +20,27 @@ if (!$body || empty($body['items'])) {
 $items        = $body['items'];
 $subtotal     = floatval($body['subtotal']      ?? 0);
 $deliveryFee  = floatval($body['delivery_fee']  ?? 0);
-$total        = floatval($body['total']         ?? 0);
 $fulfillment  = in_array($body['fulfillment'] ?? '', ['pickup','delivery']) ? $body['fulfillment'] : 'pickup';
 $payment      = $body['payment_method']  ?? 'cash';
 $deliveryAddr = $body['delivery_address'] ?? '';
 $contactNum   = $body['contact_number']  ?? '';
 $specialNotes = $body['special_notes']   ?? '';
 $itemsJson    = json_encode($items);
+
+if ($fulfillment === 'pickup') {
+    $deliveryFee = 0.00;
+}
+
+$discountAmount = 0.00;
+if ($isUser) {
+    $discountAmount = $subtotal * 0.10; 
+}
+
+$total = ($subtotal - $discountAmount) + $deliveryFee;
+
+$subtotal    = round($subtotal, 2);
+$deliveryFee = round($deliveryFee, 2);
+$total       = round($total, 2);
 
 $stmt = $conn->prepare("INSERT INTO orders 
     (customer_name, user_id, items_json, subtotal, delivery_fee, total, fulfillment, payment_method, delivery_address, contact_number, special_notes)
