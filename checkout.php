@@ -97,10 +97,10 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
       <div id="pickupInfo" class="show">
         <div class="address-box">
           <strong>SYD Coffee</strong>
-          Greenrose Subdivision, Rodriguez, Rizal 1860, Philippines
+          Col. S. Cruz St. San Rafael corner Greenrose Subd.
         </div>
         <iframe class="map-frame"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3864.12!2d121.13!3d14.74!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b9b1234abcd%3A0x0!2sGreenrose+Subdivision%2C+Rodriguez%2C+Rizal!5e0!3m2!1sen!2sph!4v1715000000000!5m2!1sen!2sph"
+          src=https://www.google.com/maps?q=Col.%20S.%20Cruz%20St.%20San%20Rafael%20corner%20Greenrose%20Subd.%20(infront%20of%20ATF%20Builders%20Construction%20Supply)&output=embed"
           allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
         </iframe>
       </div>
