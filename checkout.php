@@ -100,7 +100,8 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
           Col. S. Cruz St. San Rafael corner Greenrose Subd.
         </div>
         <iframe class="map-frame"
-          src=https://www.google.com/maps?q=Col.%20S.%20Cruz%20St.%20San%20Rafael%20corner%20Greenrose%20Subd.%20(infront%20of%20ATF%20Builders%20Construction%20Supply)&output=embed"
+          src="https://www.google.com/maps?q=Col.%20S.%20Cruz%20St.%20San%20Rafael%20corner%20Greenrose%20Subd.%20(infront%20of%20ATF%20Builders%20Construction%20Supply)&output=embed"
+            allowfullscreen="" loading="lazy"
           allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
         </iframe>
       </div>
