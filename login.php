@@ -1,76 +1,90 @@
 <?php
-$host = getenv('DB_HOST') ?: 'mysql.railway.internal';
-$port = getenv('DB_PORT') ?: '3306';
-$dbname = getenv('DB_NAME') ?: 'railway';
-$username = getenv('DB_USER') ?: 'root';
-$password = getenv('DB_PASS') ?: 'itNBYATxTbQnJsCqApUXObUVFdEulyZH';
+session_start();
+include "auth/config.php";
 
-$dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";
+header("Cache-Control: no-store, no-cache, must-revalidate, private");
+header("Pragma: no-cache");
+header("Expires: 0");
 
-try {
-    $pdo = new PDO($dsn, $username, $password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
-} catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
-}
+$error = '';
+$success = '';
 
-class FakeStatement {
-    private $stmt;
-    private $params = [];
-    public $insert_id = 0;
-    public function __construct($stmt, $pdo) { 
-        $this->stmt = $stmt; 
-        $this->pdo = $pdo;
-    }
-    public function bind_param($types, &...$params) {
-        $this->params = $params;
-    }
-    public function execute() {
-        try {
-            $this->stmt->execute($this->params);
-            $this->insert_id = $this->pdo->lastInsertId();
-            return true;
-        } catch (PDOException $e) {
-            return false;
+$redirect     = isset($_GET['redirect'])    ? $_GET['redirect']    
+              : (isset($_POST['redirect'])  ? $_POST['redirect']   : '');
+$safeRedirect = ($redirect === 'checkout')  ? 'checkout.php'       : 'menu.php';
+
+$defaultTab = isset($_GET['tab']) && $_GET['tab'] === 'register' ? 'register' : 'login';
+
+// ---- LOGIN ----
+if (isset($_POST['login'])) {
+    $username = trim($_POST['username']);
+    $password = $_POST['password'];
+
+    if ($username && $password) {
+        $hashed = md5($password);
+        $stmt = $conn->prepare("SELECT * FROM users WHERE username = ? AND password = ? AND role = 'user'");
+        $stmt->bind_param("ss", $username, $hashed);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $user = $result->fetch_assoc();
+            $_SESSION['logged_in'] = true;
+            $_SESSION['name']      = $user['name'];
+            $_SESSION['role']      = $user['role'];
+            $_SESSION['user_id']   = $user['id'];
+
+            header("Location: " . ($user['role'] === 'admin' ? 'admin.php' : $safeRedirect));
+            exit();
+        } else {
+            $error      = "Invalid username or password.";
+            $defaultTab = 'login';
         }
-    }
-    public function get_result() { return new FakeResult($this->stmt); }
-    public function store_result() { return true; }
-    public function num_rows() { return $this->stmt->rowCount(); }
-    public $num_rows = 0;
-}
-
-class FakeResult {
-    private $rows = [];
-    private $index = 0;
-    public $num_rows = 0;
-    public function __construct($stmt) {
-        $this->rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $this->num_rows = count($this->rows);
-    }
-    public function fetch_assoc() {
-        return $this->rows[$this->index++] ?? null;
+    } else {
+        $error      = "Please fill in all fields.";
+        $defaultTab = 'login';
     }
 }
 
-class FakeMysqli {
-    private $pdo;
-    public $connect_error = null;
-    public function __construct($pdo) { $this->pdo = $pdo; }
-    public function query($sql) {
-        $stmt = $this->pdo->query($sql);
-        return new FakeResult($stmt);
-    }
-    public function prepare($sql) {
-        $stmt = $this->pdo->prepare($sql);
-        return new FakeStatement($stmt, $this->pdo);
-    }
-    public function real_escape_string($s) { return addslashes($s); }
-}
+// ---- REGISTER ----
+if (isset($_POST['register'])) {
+    $name     = trim($_POST['reg_name']);
+    $email    = trim($_POST['reg_email']);
+    $username = trim($_POST['reg_username']);
+    $password = $_POST['reg_password'];
 
-$conn = new FakeMysqli($pdo);
+    if ($name && $email && $username && $password) {
+        $check = $conn->prepare("SELECT id FROM users WHERE username=? OR email=?");
+        $check->bind_param("ss", $username, $email);
+        $check->execute();
+        $check->store_result();
+
+        if ($check->num_rows > 0) {
+            $error      = "Username or email already exists.";
+            $defaultTab = 'register';
+        } else {
+            $hashed = md5($password);
+            $stmt   = $conn->prepare("INSERT INTO users (name, email, username, password, role) VALUES (?, ?, ?, ?, 'user')");
+            $stmt->bind_param("ssss", $name, $email, $username, $hashed);
+
+            if ($stmt->execute()) {
+                $_SESSION['logged_in'] = true;
+                $_SESSION['name']      = $name;
+                $_SESSION['role']      = 'user';
+                $_SESSION['user_id']   = $stmt->insert_id;
+
+                header("Location: " . $safeRedirect);
+                exit();
+            } else {
+                $error      = "Registration failed. Please try again.";
+                $defaultTab = 'register';
+            }
+        }
+    } else {
+        $error      = "Please fill in all fields.";
+        $defaultTab = 'register';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -95,11 +109,11 @@ $conn = new FakeMysqli($pdo);
     <button type="button" class="tab-btn <?= $defaultTab === 'register' ? 'active' : '' ?>" onclick="switchTab('register')">Register</button>
   </div>
 
-  <?php if ($error): ?>
+  <?php if (!empty($error)): ?>
     <div class="alert alert-error">⚠ <?= htmlspecialchars($error) ?></div>
   <?php endif; ?>
 
-  <?php if ($success): ?>
+  <?php if (!empty($success)): ?>
     <div class="alert alert-success">✓ <?= htmlspecialchars($success) ?></div>
   <?php endif; ?>
 
