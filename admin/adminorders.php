@@ -14,6 +14,9 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+// Tell MySQL to use PH time for this session
+$conn->query("SET time_zone = '+08:00'");
+
 if (isset($_POST['update_status'])) {
     $id = intval($_POST['order_id']);
     $status = $conn->real_escape_string($_POST['status']);
@@ -40,6 +43,14 @@ if (isset($_POST['reset_all'])) {
 if (isset($_POST['empty_bin'])) {
     $conn->query("DELETE FROM orders WHERE deleted_at IS NOT NULL");
     header("Location: adminorders.php"); exit();
+}
+
+// Helper: format any datetime string as PH time
+function phTime($datetime, $format = 'M j, Y g:i A') {
+    if (empty($datetime)) return '';
+    $dt = new DateTime($datetime, new DateTimeZone('Asia/Manila'));
+    $dt->setTimezone(new DateTimeZone('Asia/Manila'));
+    return $dt->format($format);
 }
 
 $filter = $_GET['filter'] ?? 'all';
@@ -277,15 +288,19 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
         <div class="orders-list">
         <?php
         $statusBadges = ['pending'=>'badge-pending','preparing'=>'badge-preparing','ready'=>'badge-ready','completed'=>'badge-completed','cancelled'=>'badge-cancelled'];
+        $phTz = new DateTimeZone('Asia/Manila');
         $hasOrders = false;
         while ($order = $orders->fetch_assoc()):
             $hasOrders = true;
             $items = json_decode($order['items_json'], true) ?: [];
-            $isNew = (strtotime($order['created_at']) >= time() - 300);
-            $badge = $statusBadges[$order['status']] ?? 'badge-pending';
-            $createdAt = date('M j, Y g:i A', strtotime($order['created_at']));
+            // Use DateTime with explicit PH timezone for "is new" check and display
+            $createdDt = new DateTime($order['created_at'], $phTz);
+            $nowDt     = new DateTime('now', $phTz);
+            $isNew     = ($nowDt->getTimestamp() - $createdDt->getTimestamp()) < 300 && $order['status'] === 'pending';
+            $badge     = $statusBadges[$order['status']] ?? 'badge-pending';
+            $createdAt = $createdDt->format('M j, Y g:i A');
         ?>
-        <div class="order-card <?= $isNew && $order['status']==='pending' ? 'is-new' : '' ?>">
+        <div class="order-card <?= $isNew ? 'is-new' : '' ?>">
             <div class="order-head">
                 <div class="order-id">Order #<?= $order['id'] ?></div>
                 <div class="order-time"><?= $createdAt ?></div>
@@ -375,10 +390,12 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
             $hasTrashed = false;
             while ($order = $trashedOrders->fetch_assoc()):
                 $hasTrashed = true;
-                $items = json_decode($order['items_json'], true) ?: [];
-                $badge = $statusBadges[$order['status']] ?? 'badge-pending';
-                $createdAt = date('M j, Y g:i A', strtotime($order['created_at']));
-                $deletedAt = date('M j, Y g:i A', strtotime($order['deleted_at']));
+                $items     = json_decode($order['items_json'], true) ?: [];
+                $badge     = $statusBadges[$order['status']] ?? 'badge-pending';
+                $createdDt = new DateTime($order['created_at'], $phTz);
+                $deletedDt = new DateTime($order['deleted_at'], $phTz);
+                $createdAt = $createdDt->format('M j, Y g:i A');
+                $deletedAt = $deletedDt->format('M j, Y g:i A');
             ?>
             <div class="order-card is-trashed">
                 <div class="order-head">
