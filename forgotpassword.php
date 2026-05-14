@@ -6,14 +6,14 @@ header("Cache-Control: no-store, no-cache, must-revalidate, private");
 header("Pragma: no-cache");
 header("Expires: 0");
 
-$step    = 'find';   // find → verify → reset → done
+$step    = 'find';   
 $error   = '';
 $success = '';
 
 $redirect     = isset($_GET['redirect']) ? $_GET['redirect'] : '';
 $safeRedirect = ($redirect === 'checkout') ? 'checkout.php' : 'menu.php';
 
-// ── STEP 1: Find account by username or email ──
+
 if (isset($_POST['find_account'])) {
     $lookup = trim($_POST['lookup']);
     if (!$lookup) {
@@ -32,14 +32,13 @@ if (isset($_POST['find_account'])) {
             $user = $result->fetch_assoc();
             $_SESSION['fp_user_id'] = $user['id'];
             $_SESSION['fp_name']    = $user['name'];
-            // Security question: last 3 chars of username + first letter of name
-            // We'll use a simple "confirm your name" approach since there are no security questions in the DB
+           
             $step = 'verify';
         }
     }
 }
 
-// ── STEP 2: Verify identity (confirm full name) ──
+
 if (isset($_POST['verify_identity'])) {
     if (!isset($_SESSION['fp_user_id'])) {
         header("Location: forgotpassword.php"); exit();
@@ -54,7 +53,7 @@ if (isset($_POST['verify_identity'])) {
     }
 }
 
-// ── STEP 3: Set new password ──
+
 if (isset($_POST['reset_password'])) {
     if (!isset($_SESSION['fp_verified']) || !$_SESSION['fp_verified'] || !isset($_SESSION['fp_user_id'])) {
         header("Location: forgotpassword.php"); exit();
@@ -78,7 +77,7 @@ if (isset($_POST['reset_password'])) {
     }
 }
 
-// Restore step from session if returning after POST with errors
+
 if ($step === 'find' && empty($error) && isset($_SESSION['fp_user_id'])) {
     $step = isset($_SESSION['fp_verified']) && $_SESSION['fp_verified'] ? 'reset' : 'verify';
 }
@@ -103,7 +102,7 @@ if ($step === 'find' && empty($error) && isset($_SESSION['fp_user_id'])) {
 
 <div class="fp-card">
 
-  <!-- Progress steps -->
+
   <div class="steps">
     <div class="step <?= in_array($step, ['find','verify','reset','done']) ? 'done' : '' ?> <?= $step==='find' ? 'active' : '' ?>">
       <div class="step-dot">1</div>
@@ -125,7 +124,7 @@ if ($step === 'find' && empty($error) && isset($_SESSION['fp_user_id'])) {
     <div class="alert alert-error">⚠ <?= htmlspecialchars($error) ?></div>
   <?php endif; ?>
 
-  <!-- STEP 1: Find account -->
+
   <?php if ($step === 'find'): ?>
   <div class="fp-header">
     <h2>Forgot your password?</h2>
@@ -141,7 +140,7 @@ if ($step === 'find' && empty($error) && isset($_SESSION['fp_user_id'])) {
   </form>
   <?php endif; ?>
 
-  <!-- STEP 2: Verify identity -->
+  
   <?php if ($step === 'verify'): ?>
   <div class="fp-header">
     <h2>Verify your identity</h2>
@@ -157,7 +156,7 @@ if ($step === 'find' && empty($error) && isset($_SESSION['fp_user_id'])) {
   </form>
   <?php endif; ?>
 
-  <!-- STEP 3: Reset password -->
+
   <?php if ($step === 'reset'): ?>
   <div class="fp-header">
     <h2>Set a new password</h2>
@@ -186,7 +185,6 @@ if ($step === 'find' && empty($error) && isset($_SESSION['fp_user_id'])) {
   </form>
   <?php endif; ?>
 
-  <!-- STEP 4: Done -->
   <?php if ($step === 'done'): ?>
   <div class="done-state">
     <div class="done-icon">✓</div>
