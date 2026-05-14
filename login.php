@@ -151,7 +151,7 @@ if (isset($_POST['register'])) {
   .go-back-btn{
     position: fixed;
     top: 20px;
-    right: 20px;
+    left: 20px;
     background: #4a3020;
     color: white;
     text-decoration: none;
