@@ -134,8 +134,8 @@ $userName = $loggedIn ? $_SESSION['name'] : '';
     <div class="footer-col">
       <h4>Connect</h4>
       <ul class="footer-links">
-        <li><a href="https://www.facebook.com/sydcoffee">Facebook</a></li>
-        <li><a href="mailto:hello@sydcoffee.com">hello@sydcoffee.com</a></li>
+        <li><a href="https://www.facebook.com/sydcoffee">SOCIAL:Facebook</a></li>
+        <li><a href="mailto:hello@sydcoffee.com">EMAIL:hello@sydcoffee.com</a></li>
       </ul>
     </div>
   </div>
