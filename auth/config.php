@@ -1,18 +1,25 @@
 <?php
+$host = getenv('DB_HOST') ?: 'turntable.proxy.rlwy.net';
+$port = getenv('DB_PORT') ?: '41685';
+$dbname = getenv('DB_NAME') ?: 'railway';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASS') ?: 'itNBYATxTbQnJsCqApUXObUVFdEulyZH';
 
-$dbUrl = getenv("DATABASE_URL");
+$conn = new mysqli($host, $username, $password, $dbname, $port);
 
-$url = parse_url($dbUrl);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?><?php
+$host = getenv('DB_HOST') ?: 'turntable.proxy.rlwy.net';
+$port = getenv('DB_PORT') ?: '41685';
+$dbname = getenv('DB_NAME') ?: 'railway';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASS') ?: 'itNBYATxTbQnJsCqApUXObUVFdEulyZH';
 
-$host = $url["host"];
-$user = $url["user"];
-$pass = $url["pass"];
-$db   = ltrim($url["path"], "/");
-$port = $url["port"];
+$conn = new mysqli($host, $username, $password, $dbname, $port);
 
-$conn = mysqli_connect($host, $user, $pass, $db, $port);
-
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 ?>
