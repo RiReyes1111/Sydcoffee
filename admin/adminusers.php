@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "config.php";
+include('../auth/config.php');
 
 header("Cache-Control: no-store, no-cache, must-revalidate, private");
 header("Pragma: no-cache");
@@ -49,6 +49,7 @@ $totalAdmins = $conn->query("SELECT COUNT(*) as c FROM users WHERE role='admin'"
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Users Management — SYD Coffee</title>
+<link rel="icon" type="image/png" href="../images/logosydnobg.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
@@ -66,23 +67,23 @@ $totalAdmins = $conn->query("SELECT COUNT(*) as c FROM users WHERE role='admin'"
 body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--text-dark);min-height:100vh;display:flex;font-size:13px;}
 
 .sidebar{width:var(--sidebar-w);background:var(--espresso);min-height:100vh;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:200;transition:transform 0.3s;}
-.sidebar-logo{padding:26px 20px 22px;border-bottom:1px solid rgba(255,255,255,0.08);}
-.sidebar-wordmark{font-family:'Playfair Display',serif;font-size:18px;color:var(--cream);font-style:italic;}
-.sidebar-sub{font-size:9px;letter-spacing:2px;color:#7a6040;text-transform:uppercase;margin-top:3px;}
-.sidebar-nav{padding:18px 12px 8px;}
-.sidebar-nav-label{font-size:9px;font-weight:700;letter-spacing:2px;color:#4a3020;text-transform:uppercase;padding:0 8px;margin-bottom:8px;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:8px;color:#7a6040;font-size:12px;font-weight:500;text-decoration:none;transition:all 0.2s;margin-bottom:2px;}
+.sidebar-logo{padding:20px 20px 18px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px;}
+.sidebar-logo img{height:38px;width:auto;filter:brightness(0) invert(1);opacity:0.9;}
+.sidebar-wordmark{font-family:'Playfair Display',serif;font-size:16px;color:var(--cream);font-style:italic;}
+.sidebar-sub{font-size:9px;letter-spacing:2px;color:#a08060;text-transform:uppercase;margin-top:2px;}
+.sidebar-nav{padding:18px 12px 8px;flex:1;}
+.sidebar-nav-label{font-size:9px;font-weight:700;letter-spacing:2px;color:#7a6040;text-transform:uppercase;padding:0 8px;margin-bottom:8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:8px;color:#c8b89a;font-size:12px;font-weight:500;text-decoration:none;transition:all 0.2s;margin-bottom:2px;}
 .nav-item i{font-size:15px;}
-.nav-item:hover{background:rgba(255,255,255,0.05);color:var(--gold);}
-.nav-item.active{background:rgba(200,151,58,0.14);color:#e8b84b;}
+.nav-item:hover{background:rgba(255,255,255,0.08);color:#ffffff;}
+.nav-item.active{background:rgba(200,151,58,0.20);color:#e8b84b;}
 .sidebar-spacer{flex:1;}
 .sidebar-bottom{padding:14px 12px;border-top:1px solid rgba(255,255,255,0.07);}
-.sidebar-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;}
-.sidebar-user:hover{background:rgba(255,255,255,0.04);}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;}
 .user-avatar{width:30px;height:30px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--espresso);flex-shrink:0;}
-.user-name{font-size:12px;font-weight:600;color:var(--text-faint);}
-.user-role{font-size:10px;color:#4a3020;}
-.logout-link{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:#7a3a2a;font-size:12px;text-decoration:none;margin-top:4px;transition:all 0.2s;}
+.user-name{font-size:12px;font-weight:600;color:#e0d0be;}
+.user-role{font-size:10px;color:#7a6040;}
+.logout-link{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:#c07060;font-size:12px;text-decoration:none;margin-top:4px;transition:all 0.2s;}
 .logout-link i{font-size:15px;}
 .logout-link:hover{background:rgba(192,57,43,0.08);color:var(--red);}
 
@@ -92,7 +93,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
 .topbar-sub{font-size:11px;color:var(--text-muted);margin-top:2px;}
 .menu-toggle{display:none;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-dark);padding:4px;}
 
-.content{padding:24px 28px;flex:1;max-width:960px;width:100%;}
+.content{padding:24px 28px;flex:1;width:100%;}
 
 .stats{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
 .stat-pill{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:16px 22px;flex:1;min-width:110px;border-left:3px solid var(--gold);}
@@ -153,8 +154,11 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-        <div class="sidebar-wordmark">SYD Coffee</div>
-        <div class="sidebar-sub">Admin Panel</div>
+        <img src="../images/logosydnobg.png" alt="SYD Coffee">
+        <div>
+            <div class="sidebar-wordmark">SYD Coffee</div>
+            <div class="sidebar-sub">Admin Panel</div>
+        </div>
     </div>
     <div class="sidebar-nav">
         <div class="sidebar-nav-label">Navigation</div>
@@ -162,7 +166,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
         <a class="nav-item active" href="adminusers.php"><i class="ti ti-users"></i> Users</a>
         <a class="nav-item" href="adminitems.php"><i class="ti ti-coffee"></i> Items</a>
         <a class="nav-item" href="adminorders.php"><i class="ti ti-clipboard-list"></i> Orders</a>
-        <a class="nav-item" href="menu.php" target="_blank"><i class="ti ti-external-link"></i> View Menu</a>
+        <a class="nav-item" href="../menu.php" target="_blank"><i class="ti ti-external-link"></i> View Menu</a>
     </div>
     <div class="sidebar-spacer"></div>
     <div class="sidebar-bottom">
@@ -173,7 +177,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
                 <div class="user-role">Super Admin</div>
             </div>
         </div>
-        <a class="logout-link" href="logout.php"><i class="ti ti-logout"></i> Logout</a>
+        <a class="logout-link" href="../logout.php"><i class="ti ti-logout"></i> Logout</a>
     </div>
 </div>
 

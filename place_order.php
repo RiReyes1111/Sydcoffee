@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "config.php";
+include "auth/config.php";
 
 header('Content-Type: application/json');
 header("Cache-Control: no-store");

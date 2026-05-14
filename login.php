@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "config.php";
+include "auth/config.php";
 
 header("Cache-Control: no-store, no-cache, must-revalidate, private");
 header("Pragma: no-cache");
@@ -9,12 +9,10 @@ header("Expires: 0");
 $error = '';
 $success = '';
 
-// Capture redirect target — survive both GET and POST
 $redirect     = isset($_GET['redirect'])    ? $_GET['redirect']    
               : (isset($_POST['redirect'])  ? $_POST['redirect']   : '');
 $safeRedirect = ($redirect === 'checkout')  ? 'checkout.php'       : 'menu.php';
 
-// Default tab to show
 $defaultTab = isset($_GET['tab']) && $_GET['tab'] === 'register' ? 'register' : 'login';
 
 // ---- LOGIN ----
@@ -70,7 +68,6 @@ if (isset($_POST['register'])) {
             $stmt->bind_param("ssss", $name, $email, $username, $hashed);
 
             if ($stmt->execute()) {
-                // Auto-login immediately after registration
                 $_SESSION['logged_in'] = true;
                 $_SESSION['name']      = $name;
                 $_SESSION['role']      = 'user';
@@ -94,9 +91,10 @@ if (isset($_POST['register'])) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login | SYD Coffee</title>
+<title>Login — SYD Coffee</title>
+<link rel="icon" type="image/png" href="images/logosydnobg.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="logincss.css">
+<link rel="stylesheet" href="css/logincss.css">
 </head>
 <body>
 

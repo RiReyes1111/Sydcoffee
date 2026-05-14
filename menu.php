@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "config.php";
+include "auth/config.php";
 
 header("Cache-Control: no-store, no-cache, must-revalidate, private");
 header("Pragma: no-cache");
@@ -25,654 +25,42 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>SYD Coffee — Menu</title>
+<link rel="icon" type="image/png" href="images/logosydnobg.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/menucss.css">
 <script>
   window.addEventListener("pageshow", function(e) { if (e.persisted) window.location.reload(); });
 </script>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --cream:      #f8f5ef;
-    --cream-dark: #ede8de;
-    --espresso:   #1e120a;
-    --brown-mid:  #4a3020;
-    --brown-light:#7a5c3e;
-    --gold:       #c8973a;
-    --gold-light: #e8b84b;
-    --white:      #ffffff;
-    --text-muted: #7a6555;
-    --green:      #2d7a4f;
-    --nav-h:      72px;
-    --radius-lg:  20px;
-    --radius-md:  12px;
-    --shadow:     0 8px 40px rgba(30,18,10,0.13);
-    --shadow-sm:  0 2px 12px rgba(30,18,10,0.08);
-    --ease:       0.3s cubic-bezier(0.4,0,0.2,1);
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'Montserrat', sans-serif;
-    background: var(--cream);
-    color: var(--espresso);
-    overflow-x: hidden;
-  }
-
-  img { display: block; max-width: 100%; }
-
-  /* ── NAVBAR ── */
-  .navbar {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 1000;
-    height: var(--nav-h);
-    padding: 0 6%;
-    display: flex;
-    align-items: center;
-    background: rgba(248,245,239,0.97);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 2px 20px rgba(30,18,10,0.08);
-  }
-
-  .nav-logo-link { line-height: 0; flex-shrink: 0; }
-  .logo-nav { height: 44px; width: auto; }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    list-style: none;
-    margin-left: 36px;
-  }
-
-  .nav-links a {
-    font-size: 11px; font-weight: 600;
-    letter-spacing: 2px; text-transform: uppercase;
-    text-decoration: none; color: var(--espresso);
-    position: relative; padding-bottom: 3px;
-    transition: color var(--ease);
-  }
-  .nav-links a.active { color: var(--gold); }
-  .nav-links a::after {
-    content: ''; position: absolute;
-    bottom: 0; left: 0;
-    width: 0; height: 1.5px;
-    background: var(--gold);
-    transition: width var(--ease);
-  }
-  .nav-links a:hover::after,
-  .nav-links a.active::after { width: 100%; }
-
-  .nav-auth {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .nav-user {
-    font-size: 12px; font-weight: 600;
-    letter-spacing: 0.5px; color: var(--brown-mid);
-  }
-
-  .btn-nav {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    text-decoration: none;
-    padding: 8px 22px;
-    border-radius: 30px;
-    transition: var(--ease);
-  }
-  .btn-nav-login {
-    background: var(--espresso); color: var(--cream);
-    border: 1.5px solid var(--espresso);
-  }
-  .btn-nav-login:hover { background: var(--brown-mid); border-color: var(--brown-mid); }
-  .btn-nav-logout {
-    background: transparent; color: var(--espresso);
-    border: 1.5px solid rgba(30,18,10,0.25);
-  }
-  .btn-nav-logout:hover { background: var(--espresso); color: var(--cream); border-color: var(--espresso); }
-  .btn-nav-dash {
-    background: var(--gold); color: var(--espresso);
-    border: 1.5px solid var(--gold);
-  }
-  .btn-nav-dash:hover { background: var(--gold-light); border-color: var(--gold-light); }
-
-  .hamburger {
-    display: none; flex-direction: column;
-    gap: 5px; cursor: pointer; padding: 6px;
-    margin-left: auto; z-index: 10002;
-    background: none; border: none;
-  }
-  .hamburger span {
-    display: block; width: 22px; height: 2px;
-    background: var(--espresso); border-radius: 2px;
-    transition: var(--ease);
-  }
-  .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
-  .hamburger.active span:nth-child(2) { opacity: 0; }
-  .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
-
-  .mobile-menu {
-    display: none;
-    position: fixed; inset: 0;
-    background: var(--cream);
-    z-index: 10001;
-    flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 28px;
-  }
-  .mobile-menu.open { display: flex; }
-  .mobile-menu a {
-    font-size: 13px; font-weight: 700;
-    letter-spacing: 3px; text-transform: uppercase;
-    color: var(--espresso); text-decoration: none;
-    transition: color var(--ease);
-  }
-  .mobile-menu a:hover { color: var(--gold); }
-  .mobile-divider { width: 40px; height: 1px; background: var(--cream-dark); }
-
-  /* ── HAPPY HOUR BANNER ── */
-  .happy-banner {
-    background: linear-gradient(135deg, var(--brown-mid), var(--espresso));
-    color: var(--gold-light);
-    text-align: center;
-    padding: 12px 20px;
-    font-size: 13px; font-weight: 700;
-    letter-spacing: 1px;
-    margin-top: var(--nav-h);
-  }
-
-  /* ── HERO ── */
-  .menu-hero {
-    position: relative;
-    padding: calc(var(--nav-h) + 60px) 6% 80px;
-    background: var(--espresso);
-    text-align: center;
-    overflow: hidden;
-  }
-  .menu-hero-bg {
-    position: absolute; inset: 0;
-    background-image: url('images/Gallery\ photo4.jpg');
-    background-size: cover; background-position: center;
-    opacity: 0.25;
-  }
-  .menu-hero-content { position: relative; z-index: 2; }
-  .menu-hero-eyebrow {
-    display: inline-block;
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 5px; text-transform: uppercase;
-    color: var(--gold-light); margin-bottom: 16px;
-  }
-  .menu-hero h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.4rem, 5vw, 4rem);
-    font-weight: 400; color: var(--white);
-    line-height: 1.1; margin-bottom: 16px;
-  }
-  .menu-hero h1 em { font-style: italic; color: var(--gold-light); }
-  .menu-hero p {
-    font-size: 14px; color: rgba(255,255,255,0.65);
-    line-height: 1.75; max-width: 480px; margin: 0 auto;
-  }
-
-  /* ── CATEGORY NAV ── */
-  .cat-nav {
-    position: sticky;
-    top: var(--nav-h);
-    z-index: 500;
-    background: var(--white);
-    border-bottom: 1px solid var(--cream-dark);
-    display: flex;
-    justify-content: center;
-    gap: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .cat-nav::-webkit-scrollbar { display: none; }
-  .cat-nav a {
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase;
-    text-decoration: none; color: var(--text-muted);
-    padding: 16px 28px;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-    transition: var(--ease);
-  }
-  .cat-nav a:hover,
-  .cat-nav a.active {
-    color: var(--espresso);
-    border-bottom-color: var(--gold);
-  }
-
-  /* ── SECTION ── */
-  .menu-section {
-    padding: 72px 6%;
-  }
-  .menu-section:nth-child(even) { background: var(--cream-dark); }
-
-  .section-header {
-    text-align: center;
-    margin-bottom: 48px;
-  }
-  .section-tag {
-    display: inline-block;
-    font-size: 9px; font-weight: 800;
-    letter-spacing: 3px; text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 10px;
-  }
-  .section-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.7rem, 3.5vw, 2.4rem);
-    font-weight: 400; color: var(--espresso);
-    letter-spacing: 0; text-transform: none;
-    line-height: 1.2;
-  }
-
-  /* ── PRODUCT GRID ── */
-  .product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  /* ── PRODUCT CARD ── */
-  .product-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    border: 1.5px solid var(--cream-dark);
-    display: flex;
-    flex-direction: column;
-    transition: box-shadow var(--ease), transform var(--ease), border-color var(--ease);
-  }
-  .product-card:hover {
-    box-shadow: var(--shadow);
-    transform: translateY(-4px);
-    border-color: #d4bfa0;
-  }
-
-  .card-img {
-    width: 100%;
-    aspect-ratio: 4/3;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-  .card-img img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    transition: transform 0.6s ease;
-  }
-  .product-card:hover .card-img img { transform: scale(1.06); }
-
-  .card-body {
-    padding: 18px 18px 14px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .card-name {
-    font-size: 14px; font-weight: 700;
-    color: var(--espresso); line-height: 1.3;
-  }
-
-  .price-row {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
-  .price-pill {
-    background: var(--cream);
-    border: 1px solid var(--cream-dark);
-    border-radius: 20px;
-    padding: 5px 14px;
-    font-size: 12px; font-weight: 700;
-    color: var(--brown-mid);
-    display: flex; flex-direction: column;
-    align-items: center; gap: 1px;
-  }
-  .price-pill .size-label {
-    font-size: 9px; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  .discount-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: #e8f7ee;
-    color: var(--green);
-    border: 1px solid rgba(45,122,79,0.20);
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 0.5px;
-    align-self: center;
-  }
-
-  .card-footer {
-    padding: 0 18px 18px;
-  }
-
-  .btn-buy {
-    width: 100%;
-    padding: 11px;
-    background: var(--espresso);
-    color: var(--cream);
-    border: none;
-    border-radius: var(--radius-md);
-    font-family: 'Montserrat', sans-serif;
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    cursor: pointer;
-    transition: var(--ease);
-  }
-  .btn-buy:hover {
-    background: var(--brown-mid);
-    transform: translateY(-1px);
-  }
-
-  /* ── SIZE POPUP ── */
-  .popup-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.55);
-    z-index: 3000;
-    justify-content: center; align-items: center;
-    padding: 20px;
-  }
-  .popup-overlay.active { display: flex; }
-
-  .popup-box {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    padding: 36px 28px 28px;
-    width: 100%; max-width: 360px;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  }
-  .popup-box h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem; font-weight: 400;
-    color: var(--espresso); margin-bottom: 6px;
-    letter-spacing: 0; text-transform: none;
-  }
-  .popup-box p {
-    font-size: 12px; color: var(--text-muted);
-    margin-bottom: 22px; text-align: center;
-  }
-
-  .size-options {
-    display: flex; gap: 10px;
-    justify-content: center;
-    margin-bottom: 22px;
-  }
-  .size-btn {
-    flex: 1;
-    padding: 12px 10px;
-    border: 2px solid var(--cream-dark);
-    border-radius: var(--radius-md);
-    background: var(--cream);
-    color: var(--espresso);
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700; font-size: 12px;
-    cursor: pointer;
-    transition: var(--ease);
-  }
-  .size-btn:hover,
-  .size-btn.selected {
-    background: var(--espresso);
-    border-color: var(--espresso);
-    color: var(--white);
-  }
-
-  .popup-actions {
-    display: flex; gap: 10px;
-    margin-bottom: 10px;
-  }
-  .popup-actions button {
-    flex: 1; padding: 12px;
-    border-radius: var(--radius-md);
-    border: none; font-family: 'Montserrat', sans-serif;
-    font-weight: 700; font-size: 12px;
-    letter-spacing: 0.5px; cursor: pointer;
-    transition: var(--ease);
-  }
-  .btn-add-cart {
-    background: var(--cream-dark); color: var(--espresso);
-  }
-  .btn-add-cart:hover { background: #d4bfa0; }
-  .btn-order-now {
-    background: var(--espresso); color: var(--white);
-  }
-  .btn-order-now:hover { background: var(--brown-mid); }
-
-  .btn-cancel-popup {
-    width: 100%; padding: 11px;
-    background: transparent; color: var(--text-muted);
-    border: 1.5px solid var(--cream-dark);
-    border-radius: var(--radius-md);
-    font-family: 'Montserrat', sans-serif;
-    font-size: 12px; font-weight: 600;
-    cursor: pointer; transition: var(--ease);
-  }
-  .btn-cancel-popup:hover { border-color: var(--espresso); color: var(--espresso); }
-
-  /* ── CART ── */
-  .cart-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.35); z-index: 1999;
-  }
-  .cart-overlay.active { display: block; }
-
-  .cart-sidebar {
-    position: fixed;
-    top: 0; right: -420px;
-    width: 400px; height: 100%;
-    background: var(--white);
-    box-shadow: -4px 0 30px rgba(0,0,0,0.15);
-    z-index: 2000;
-    display: flex; flex-direction: column;
-    transition: right var(--ease);
-  }
-  .cart-sidebar.open { right: 0; }
-
-  .cart-header {
-    padding: 20px 24px;
-    background: var(--espresso);
-    color: var(--white);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .cart-header h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.2rem; font-weight: 400;
-    letter-spacing: 0; text-transform: none;
-  }
-  .cart-close {
-    background: none; border: none;
-    color: rgba(255,255,255,0.7);
-    font-size: 20px; cursor: pointer;
-    line-height: 1; padding: 4px;
-    transition: color var(--ease);
-  }
-  .cart-close:hover { color: var(--white); }
-
-  .cart-items { flex: 1; overflow-y: auto; padding: 16px; }
-
-  .cart-item {
-    display: flex;
-    align-items: center;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--cream-dark);
-    gap: 12px; font-size: 13px;
-  }
-  .cart-item-info { flex: 1; }
-  .cart-item-name { font-weight: 700; color: var(--espresso); margin-bottom: 2px; }
-  .cart-item-size { font-size: 11px; color: var(--text-muted); }
-  .cart-qty {
-    display: flex; align-items: center; gap: 8px;
-    margin-top: 6px;
-  }
-  .cart-qty button {
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    border: 1.5px solid var(--cream-dark);
-    background: var(--white); color: var(--espresso);
-    font-weight: 700; font-size: 14px;
-    cursor: pointer; line-height: 1;
-    transition: var(--ease);
-  }
-  .cart-qty button:hover {
-    background: var(--espresso);
-    border-color: var(--espresso);
-    color: var(--white);
-  }
-  .cart-qty span { font-weight: 700; min-width: 20px; text-align: center; }
-  .cart-item-price { font-weight: 700; font-size: 14px; color: var(--brown-mid); }
-  .cart-item-remove {
-    background: none; border: none;
-    color: #ccc; font-size: 16px;
-    cursor: pointer; padding: 4px;
-    transition: color var(--ease);
-  }
-  .cart-item-remove:hover { color: #e74c3c; }
-
-  .cart-empty {
-    text-align: center; color: var(--text-muted);
-    margin-top: 60px; font-size: 14px; line-height: 1.8;
-  }
-
-  .cart-footer {
-    padding: 20px 24px;
-    border-top: 1px solid var(--cream-dark);
-    background: var(--cream);
-  }
-  .cart-total {
-    display: flex; justify-content: space-between;
-    font-weight: 700; font-size: 15px;
-    margin-bottom: 14px; color: var(--espresso);
-  }
-  .btn-checkout {
-    width: 100%; padding: 14px;
-    background: var(--espresso); color: var(--white);
-    border: none; border-radius: var(--radius-md);
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700; font-size: 13px;
-    letter-spacing: 1px; text-transform: uppercase;
-    cursor: pointer; transition: var(--ease);
-  }
-  .btn-checkout:hover { background: var(--brown-mid); }
-
-  .cart-toggle {
-    position: fixed;
-    bottom: 28px; right: 28px;
-    background: var(--espresso); color: var(--white);
-    border: none; border-radius: 50px;
-    padding: 13px 22px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700; font-size: 13px;
-    cursor: pointer;
-    box-shadow: 0 6px 24px rgba(30,18,10,0.25);
-    z-index: 999;
-    display: flex; align-items: center; gap: 10px;
-    transition: var(--ease);
-  }
-  .cart-toggle:hover { background: var(--brown-mid); transform: translateY(-2px); }
-
-  .cart-count {
-    background: #e74c3c;
-    border-radius: 50%;
-    width: 20px; height: 20px;
-    font-size: 11px; font-weight: 800;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  /* ── FOOTER ── */
-  .site-footer {
-    background: var(--espresso);
-    padding: 32px 6%;
-    text-align: center;
-  }
-  .site-footer p {
-    font-size: 11px; letter-spacing: 1.5px;
-    color: rgba(248,245,239,0.25);
-  }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 768px) {
-    :root { --nav-h: 62px; }
-    .navbar { padding: 0 20px; }
-    .nav-links, .nav-auth { display: none !important; }
-    .hamburger { display: flex; }
-
-    .menu-hero { padding: calc(var(--nav-h) + 40px) 20px 60px; }
-    .menu-section { padding: 56px 20px; }
-
-    .product-grid {
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 14px;
-    }
-
-    .cart-sidebar { width: 100%; right: -100%; }
-    .cart-sidebar.open { right: 0; }
-
-    .cat-nav a { padding: 14px 18px; font-size: 9px; }
-  }
-
-  @media (max-width: 400px) {
-    .product-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-    .card-body { padding: 12px 12px 10px; }
-    .card-footer { padding: 0 12px 12px; }
-    .card-name { font-size: 12px; }
-  }
-</style>
 </head>
 <body>
 
-<!-- ── NAVBAR ── -->
 <nav class="navbar" id="navbar">
   <a href="index.php" class="nav-logo-link">
     <img src="images/logosydnobg.png" alt="SYD Coffee" class="logo-nav">
   </a>
-
   <ul class="nav-links">
     <li><a href="index.php">Home</a></li>
     <li><a href="menu.php" class="active">Menu</a></li>
     <li><a href="about.php">About</a></li>
     <li><a href="contact.php">Contact</a></li>
   </ul>
-
   <div class="nav-auth">
     <?php if ($isUser): ?>
       <span class="nav-user">Hi, <?= htmlspecialchars($userName) ?>!</span>
       <a href="logout.php" class="btn-nav btn-nav-logout">Logout</a>
     <?php elseif ($isAdmin): ?>
       <span class="nav-user">Admin: <?= htmlspecialchars($userName) ?></span>
-      <a href="admin.php" class="btn-nav btn-nav-dash">Dashboard</a>
+      <a href="admin/admin.php" class="btn-nav btn-nav-dash">Dashboard</a>
       <a href="logout.php" class="btn-nav btn-nav-logout">Logout</a>
     <?php else: ?>
       <a href="login.php" class="btn-nav btn-nav-login">Login</a>
     <?php endif; ?>
   </div>
-
   <button class="hamburger" id="hamburger" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
 </nav>
 
-<!-- Mobile Menu -->
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.php">Home</a>
   <a href="menu.php">Menu</a>
@@ -683,21 +71,24 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
     <span class="nav-user" style="color:var(--brown-mid)">Hi, <?= htmlspecialchars($userName) ?>!</span>
     <a href="logout.php">Logout</a>
   <?php elseif ($isAdmin): ?>
-    <a href="admin.php">Dashboard</a>
+    <a href="admin/admin.php">Dashboard</a>
     <a href="logout.php">Logout</a>
   <?php else: ?>
     <a href="login.php">Login</a>
   <?php endif; ?>
 </div>
 
-<!-- Happy Hour Banner -->
 <?php if ($isUser && $isHappyHour): ?>
-<div class="happy-banner">
-  🎉 Happy Hour! 20% off all Cold Drinks until 5:00 PM!
+<div class="happy-banner">Happy Hour! 20% off all Cold Drinks until 5:00 PM!</div>
+<?php endif; ?>
+
+<?php if ($isAdmin): ?>
+<div class="admin-menu-banner">
+  <span class="admin-menu-banner-icon">&#9888;</span>
+  You are viewing the menu as an admin — ordering is disabled. Go to the <a href="admin/admin.php">Dashboard</a> to manage items.
 </div>
 <?php endif; ?>
 
-<!-- ── HERO ── -->
 <div class="menu-hero" <?php if (!$isUser && !$isHappyHour): ?>style="margin-top:var(--nav-h)"<?php endif; ?>>
   <div class="menu-hero-bg"></div>
   <div class="menu-hero-content">
@@ -707,52 +98,63 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
   </div>
 </div>
 
-<!-- ── CATEGORY NAV ── -->
 <nav class="cat-nav">
   <a href="#coldcoffee">Cold Coffee</a>
-  <a href="#noncoffee">Non-Coffee & Soda</a>
+  <a href="#noncoffee">Non-Coffee &amp; Soda</a>
   <a href="#hotdrinks">Hot Drinks</a>
 </nav>
 
-<!-- SIZE POPUP -->
+<?php if (!$isAdmin): ?>
 <div class="popup-overlay" id="sizePopup">
   <div class="popup-box">
+    <span class="popup-icon">&#9749;</span>
     <h3 id="popupItemName"></h3>
-    <p>Choose your size</p>
+    <p class="popup-sub">Choose your size</p>
+    <div class="popup-divider"></div>
     <div class="size-options" id="sizeOptions"></div>
-    <div class="popup-actions">
-      <button class="btn-add-cart" onclick="confirmAction('cart')">Add to Cart</button>
-      <button class="btn-order-now" onclick="confirmAction('order')">Order Now</button>
+    <div class="qty-wrap">
+      <span class="qty-label">Quantity</span>
+      <div class="qty-controls">
+        <button class="qty-btn" id="qtyMinus" onclick="changePopupQty(-1)">&#8722;</button>
+        <div class="qty-display" id="qtyDisplay">1</div>
+        <button class="qty-btn" id="qtyPlus" onclick="changePopupQty(1)">+</button>
+      </div>
     </div>
+    <div style="height:20px;"></div>
+    <button class="btn-order-now" onclick="confirmAction('order')">Order Now</button>
+    <button class="btn-add-cart" onclick="confirmAction('cart')">Add to Cart</button>
     <button class="btn-cancel-popup" onclick="closePopup()">Cancel</button>
   </div>
 </div>
 
-<!-- Cart -->
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 <div class="cart-sidebar" id="cartSidebar">
   <div class="cart-header">
-    <h3>Your Cart</h3>
-    <button class="cart-close" onclick="closeCart()">✕</button>
+    <span class="cart-header-title">Your Cart</span>
+    <span class="cart-header-count" id="cartHeaderCount">0 items</span>
+    <button class="cart-close" onclick="closeCart()">&#10005;</button>
   </div>
   <div class="cart-items" id="cartItems"></div>
-  <div class="cart-footer">
-    <div class="cart-total">
-      <span>Total</span>
-      <span id="cartTotal">₱0.00</span>
+  <div class="cart-footer" id="cartFooter" style="display:none;">
+    <div class="cart-summary">
+      <div class="cart-summary-row"><span>Subtotal</span><span id="cartSubtotal">&#8369;0.00</span></div>
+      <div class="cart-summary-row"><span>Items</span><span id="cartItemCount">0</span></div>
+      <div class="cart-summary-row total"><span>Total</span><span id="cartTotal">&#8369;0.00</span></div>
     </div>
-    <button class="btn-checkout" onclick="goToCheckout()">Proceed to Checkout</button>
+    <div class="cart-actions">
+      <button class="btn-checkout" onclick="goToCheckout()">Proceed to Checkout &#8594;</button>
+      <button class="btn-clear-cart" onclick="clearCart()">Clear Cart</button>
+    </div>
   </div>
 </div>
 
-<button class="cart-toggle" onclick="openCart()">
-  🛒 Cart <span class="cart-count" id="cartCount">0</span>
+<button class="cart-toggle" onclick="openCart()" id="cartToggleBtn">
+  Cart <span class="cart-count" id="cartCount">0</span>
 </button>
+<?php endif; ?>
 
-<!-- ── MENU SECTIONS ── -->
 <main>
 
-<!-- COLD COFFEE -->
 <section class="menu-section" id="coldcoffee">
   <div class="section-header">
     <span class="section-tag">Iced &amp; Refreshing</span>
@@ -776,30 +178,27 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
     <div class="card-body">
       <div class="card-name"><?= htmlspecialchars($row['name']) ?></div>
       <div class="price-row">
-        <div class="price-pill">
-          <span class="size-label">Small</span>
-          ₱<?= number_format($small, 2) ?>
-        </div>
-        <div class="price-pill">
-          <span class="size-label">Large</span>
-          ₱<?= number_format($large, 2) ?>
-        </div>
+        <div class="price-pill"><span class="size-label">Small</span>&#8369;<?= number_format($small, 2) ?></div>
+        <div class="price-pill"><span class="size-label">Large</span>&#8369;<?= number_format($large, 2) ?></div>
       </div>
       <?php if ($isUser && $isHappyHour): ?>
-        <span class="discount-tag">🎉 20% OFF — Happy Hour</span>
+        <span class="discount-tag">20% OFF — Happy Hour</span>
       <?php elseif ($isUser): ?>
-        <span class="discount-tag">✓ 10% Member Discount</span>
+        <span class="discount-tag">10% Member Discount</span>
       <?php endif; ?>
     </div>
     <div class="card-footer">
-      <button class="btn-buy" onclick="openPopup('<?= addslashes($row['name']) ?>', 'two', <?= number_format($small, 2, '.', '') ?>, <?= number_format($large, 2, '.', '') ?>)">Buy Now</button>
+      <?php if ($isAdmin): ?>
+        <span class="admin-view-badge">Admin View Only</span>
+      <?php else: ?>
+        <button class="btn-buy" onclick="openPopup('<?= addslashes($row['name']) ?>', 'two', <?= number_format($small, 2, '.', '') ?>, <?= number_format($large, 2, '.', '') ?>)">Buy Now</button>
+      <?php endif; ?>
     </div>
   </div>
   <?php endwhile; ?>
   </div>
 </section>
 
-<!-- NON-COFFEE -->
 <section class="menu-section" id="noncoffee">
   <div class="section-header">
     <span class="section-tag">Fruity &amp; Fizzy</span>
@@ -823,28 +222,25 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
     <div class="card-body">
       <div class="card-name"><?= htmlspecialchars($row['name']) ?></div>
       <div class="price-row">
-        <div class="price-pill">
-          <span class="size-label">Small</span>
-          ₱<?= number_format($small, 2) ?>
-        </div>
-        <div class="price-pill">
-          <span class="size-label">Large</span>
-          ₱<?= number_format($large, 2) ?>
-        </div>
+        <div class="price-pill"><span class="size-label">Small</span>&#8369;<?= number_format($small, 2) ?></div>
+        <div class="price-pill"><span class="size-label">Large</span>&#8369;<?= number_format($large, 2) ?></div>
       </div>
       <?php if ($isUser): ?>
-        <span class="discount-tag">✓ 10% Member Discount</span>
+        <span class="discount-tag">10% Member Discount</span>
       <?php endif; ?>
     </div>
     <div class="card-footer">
-      <button class="btn-buy" onclick="openPopup('<?= addslashes($row['name']) ?>', 'two', <?= number_format($small, 2, '.', '') ?>, <?= number_format($large, 2, '.', '') ?>)">Buy Now</button>
+      <?php if ($isAdmin): ?>
+        <span class="admin-view-badge">Admin View Only</span>
+      <?php else: ?>
+        <button class="btn-buy" onclick="openPopup('<?= addslashes($row['name']) ?>', 'two', <?= number_format($small, 2, '.', '') ?>, <?= number_format($large, 2, '.', '') ?>)">Buy Now</button>
+      <?php endif; ?>
     </div>
   </div>
   <?php endwhile; ?>
   </div>
 </section>
 
-<!-- HOT DRINKS -->
 <section class="menu-section" id="hotdrinks">
   <div class="section-header">
     <span class="section-tag">Warm &amp; Cozy</span>
@@ -864,17 +260,18 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
     <div class="card-body">
       <div class="card-name"><?= htmlspecialchars($row['name']) ?></div>
       <div class="price-row">
-        <div class="price-pill">
-          <span class="size-label">Single</span>
-          ₱<?= number_format($price, 2) ?>
-        </div>
+        <div class="price-pill"><span class="size-label">Single</span>&#8369;<?= number_format($price, 2) ?></div>
       </div>
       <?php if ($isUser): ?>
-        <span class="discount-tag">✓ 10% Member Discount</span>
+        <span class="discount-tag">10% Member Discount</span>
       <?php endif; ?>
     </div>
     <div class="card-footer">
-      <button class="btn-buy" onclick="openPopup('<?= addslashes($row['name']) ?>', 'single', <?= number_format($price, 2, '.', '') ?>, 0)">Buy Now</button>
+      <?php if ($isAdmin): ?>
+        <span class="admin-view-badge">Admin View Only</span>
+      <?php else: ?>
+        <button class="btn-buy" onclick="openPopup('<?= addslashes($row['name']) ?>', 'single', <?= number_format($price, 2, '.', '') ?>, 0)">Buy Now</button>
+      <?php endif; ?>
     </div>
   </div>
   <?php endwhile; ?>
@@ -884,11 +281,10 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
 </main>
 
 <footer class="site-footer">
-  <p>&copy; 2025 SYD Coffee</p>
+  <p>&copy; 2026 SYD Coffee</p>
 </footer>
 
 <script>
-  // Hamburger
   const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobileMenu');
   hamburger.addEventListener('click', function() {
@@ -904,7 +300,6 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
     });
   });
 
-  // Category nav active state on scroll
   const sections = ['coldcoffee','noncoffee','hotdrinks'];
   const catLinks = document.querySelectorAll('.cat-nav a');
   window.addEventListener('scroll', function() {
@@ -918,7 +313,7 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
     });
   }, { passive: true });
 
-  // Cart logic
+  <?php if (!$isAdmin): ?>
   function loadCart() {
     try {
       const raw = JSON.parse(localStorage.getItem('sydCart') || '[]');
@@ -931,40 +326,51 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
   function saveCart() { localStorage.setItem('sydCart', JSON.stringify(cart)); }
 
   let currentItem = {};
+  let popupQty = 1;
 
   function openPopup(name, type, price1, price2) {
     const p1 = parseFloat(price1), p2 = parseFloat(price2);
+    popupQty = 1;
     currentItem = { name, type, price1: p1, price2: p2, selectedSize: null, selectedPrice: null };
     document.getElementById('popupItemName').textContent = name;
+    document.getElementById('qtyDisplay').textContent = '1';
     const opts = document.getElementById('sizeOptions');
     opts.innerHTML = '';
     if (type === 'single') {
-      currentItem.selectedSize = 'Single';
+      currentItem.selectedSize  = 'Single';
       currentItem.selectedPrice = p1;
       const btn = document.createElement('button');
       btn.className = 'size-btn selected';
-      btn.textContent = 'Single — ₱' + p1.toFixed(2);
+      btn.textContent = 'Single — \u20B1' + p1.toFixed(2);
       opts.appendChild(btn);
     } else {
       [['Small', p1], ['Large', p2]].forEach(function([label, price]) {
         const btn = document.createElement('button');
         btn.className = 'size-btn';
-        btn.textContent = label + ' — ₱' + price.toFixed(2);
+        btn.textContent = label + ' — \u20B1' + price.toFixed(2);
         btn.onclick = function() {
           document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
-          currentItem.selectedSize = label;
+          currentItem.selectedSize  = label;
           currentItem.selectedPrice = price;
         };
         opts.appendChild(btn);
       });
     }
     document.getElementById('sizePopup').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function changePopupQty(delta) {
+    popupQty = Math.max(1, Math.min(20, popupQty + delta));
+    document.getElementById('qtyDisplay').textContent = popupQty;
   }
 
   function closePopup() {
     document.getElementById('sizePopup').classList.remove('active');
+    document.body.style.overflow = '';
     currentItem = {};
+    popupQty = 1;
   }
 
   function confirmAction(action) {
@@ -972,67 +378,112 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
       alert('Please select a size first!'); return;
     }
     const { name, selectedSize: size, selectedPrice: price } = currentItem;
+    const qty = popupQty;
     closePopup();
-    addToCart(name, size, parseFloat(price));
+    addToCart(name, size, parseFloat(price), qty);
     if (action === 'cart') openCart();
     else goToCheckout();
   }
 
-  function addToCart(name, size, price) {
+  function addToCart(name, size, price, qty) {
+    qty   = parseInt(qty) || 1;
     price = parseFloat(price);
     if (!name || !size || isNaN(price) || price <= 0) return;
     const existing = cart.find(i => i.name === name && i.size === size);
-    if (existing) existing.qty++;
-    else cart.push({ name, size, price, qty: 1 });
+    if (existing) existing.qty += qty;
+    else cart.push({ name, size, price, qty });
+    saveCart();
+    renderCart();
+    bumpToggle();
+  }
+
+  function removeFromCart(idx) {
+    cart.splice(idx, 1);
     saveCart(); renderCart();
   }
 
-  function removeFromCart(i) { cart.splice(i,1); saveCart(); renderCart(); }
-
-  function changeQty(i, d) {
-    cart[i].qty += d;
-    if (cart[i].qty <= 0) cart.splice(i,1);
+  function changeQty(idx, delta) {
+    cart[idx].qty += delta;
+    if (cart[idx].qty <= 0) cart.splice(idx, 1);
     saveCart(); renderCart();
+  }
+
+  function clearCart() {
+    if (!cart.length) return;
+    if (!confirm('Remove all items from your cart?')) return;
+    cart = [];
+    saveCart(); renderCart();
+  }
+
+  function bumpToggle() {
+    const btn = document.getElementById('cartToggleBtn');
+    btn.classList.remove('bump');
+    void btn.offsetWidth;
+    btn.classList.add('bump');
   }
 
   function renderCart() {
-    const container = document.getElementById('cartItems');
-    const countEl   = document.getElementById('cartCount');
-    const totalEl   = document.getElementById('cartTotal');
+    const container   = document.getElementById('cartItems');
+    const countEl     = document.getElementById('cartCount');
+    const headerCount = document.getElementById('cartHeaderCount');
+    const footer      = document.getElementById('cartFooter');
+    const subtotalEl  = document.getElementById('cartSubtotal');
+    const totalEl     = document.getElementById('cartTotal');
+    const itemCntEl   = document.getElementById('cartItemCount');
+
     let total = 0, count = 0;
+    cart.forEach(i => { total += i.price * i.qty; count += i.qty; });
+
+    countEl.textContent     = count;
+    headerCount.textContent = count === 1 ? '1 item' : count + ' items';
+
     if (!cart.length) {
-      container.innerHTML = '<div class="cart-empty">Your cart is empty.<br>Add something delicious!</div>';
+      footer.style.display = 'none';
+      container.innerHTML = `
+        <div class="cart-empty">
+          <h4>Your cart is empty</h4>
+          <p>Looks like you haven't added anything yet. Browse the menu and find something you love!</p>
+          <button class="btn-browse" onclick="closeCart()">Browse Menu</button>
+        </div>`;
     } else {
-      container.innerHTML = cart.map((item, i) => {
-        const sub = item.price * item.qty;
-        total += sub; count += item.qty;
-        return `<div class="cart-item">
-          <div class="cart-item-info">
+      footer.style.display = 'block';
+      subtotalEl.textContent = '\u20B1' + total.toFixed(2);
+      totalEl.textContent    = '\u20B1' + total.toFixed(2);
+      itemCntEl.textContent  = count + (count === 1 ? ' item' : ' items');
+      container.innerHTML = cart.map((item, i) => `
+        <div class="cart-item">
+          <div class="cart-item-details">
             <div class="cart-item-name">${item.name}</div>
-            <div class="cart-item-size">${item.size}</div>
-            <div class="cart-qty">
-              <button onclick="changeQty(${i},-1)">−</button>
-              <span>${item.qty}</span>
-              <button onclick="changeQty(${i},1)">+</button>
+            <div class="cart-item-meta">
+              <span class="cart-item-size">${item.size}</span>
+              <span class="cart-item-unit">\u20B1${item.price.toFixed(2)} each</span>
+            </div>
+            <div class="cart-item-qty">
+              <button class="cqty-btn" onclick="changeQty(${i},-1)">&#8722;</button>
+              <div class="cqty-display">${item.qty}</div>
+              <button class="cqty-btn" onclick="changeQty(${i},1)">+</button>
             </div>
           </div>
-          <span class="cart-item-price">₱${sub.toFixed(2)}</span>
-          <button class="cart-item-remove" onclick="removeFromCart(${i})">✕</button>
-        </div>`;
-      }).join('');
+          <div class="cart-item-right">
+            <span class="cart-item-price">\u20B1${(item.price * item.qty).toFixed(2)}</span>
+            <button class="cart-item-remove" onclick="removeFromCart(${i})" title="Remove">&#10005;</button>
+          </div>
+        </div>`).join('');
     }
-    countEl.textContent = count;
-    totalEl.textContent = '₱' + total.toFixed(2);
   }
 
   function openCart() {
     document.getElementById('cartSidebar').classList.add('open');
     document.getElementById('cartOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
   }
+
   function closeCart() {
     document.getElementById('cartSidebar').classList.remove('open');
     document.getElementById('cartOverlay').classList.remove('active');
+    document.body.style.overflow = '';
   }
+
   function goToCheckout() {
     if (!cart.length) { alert('Your cart is empty!'); return; }
     saveCart();
@@ -1040,6 +491,8 @@ $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
   }
 
   renderCart();
+  <?php endif; ?>
 </script>
+<?php include "includes/backtotop.php"; ?>
 </body>
 </html>

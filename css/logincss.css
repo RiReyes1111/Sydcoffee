@@ -36,7 +36,7 @@ body::before{
   content:"";
   position:fixed;
   inset:0;
-  background:url("images/Gallery photo4.jpg") center/cover;
+  background:url("../images/Gallery photo4.jpg") center/cover;
   filter:brightness(.25);
   z-index:0;
 }
