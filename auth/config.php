@@ -1,12 +1,18 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "syd_coffee";
 
-$conn = new mysqli($host, $user, $pass, $db);
+$dbUrl = getenv("DATABASE_URL");
 
-if ($conn->connect_error) {
-    die("DB Connection failed: " . $conn->connect_error);
+$url = parse_url($dbUrl);
+
+$host = $url["host"];
+$user = $url["user"];
+$pass = $url["pass"];
+$db   = ltrim($url["path"], "/");
+$port = $url["port"];
+
+$conn = mysqli_connect($host, $user, $pass, $db, $port);
+
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
 }
 ?>
