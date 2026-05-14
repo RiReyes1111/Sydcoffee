@@ -20,39 +20,57 @@ class FakeStatement {
     private $stmt;
     private $pdo;
     private $params = [];
+    private $cachedRows = [];
     public $insert_id = 0;
     public $num_rows = 0;
 
-    public function __construct($stmt, $pdo) { 
-        $this->stmt = $stmt; 
-        $this->pdo = $pdo;
+    public function __construct($stmt, $pdo) {
+        $this->stmt = $stmt;
+        $this->pdo  = $pdo;
     }
-    public function bind_param($types, &...$params) {
+
+    public function bind_param($types, ...$params) {
         $this->params = $params;
     }
+
     public function execute() {
         try {
             $this->stmt->execute($this->params);
-            $this->insert_id = $this->pdo->lastInsertId();
+            $this->insert_id = (int) $this->pdo->lastInsertId();
+            // Cache rows immediately so num_rows and get_result both work
+            try {
+                $this->cachedRows = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $e) {
+                $this->cachedRows = [];
+            }
+            $this->num_rows = count($this->cachedRows);
             return true;
         } catch (PDOException $e) {
+            error_log("FakeStatement execute error: " . $e->getMessage());
             return false;
         }
     }
-    public function get_result() { return new FakeResult($this->stmt); }
-    public function store_result() { return true; }
-    public function num_rows() { return $this->stmt->rowCount(); }
+
+    public function get_result() {
+        return new FakeResult($this->cachedRows);
+    }
+
+    public function store_result() {
+        // num_rows already set in execute(), nothing to do
+        return true;
+    }
 }
 
 class FakeResult {
-    private $rows = [];
+    private $rows  = [];
     private $index = 0;
     public $num_rows = 0;
 
-    public function __construct($stmt) {
-        $this->rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $this->num_rows = count($this->rows);
+    public function __construct($rows) {
+        $this->rows     = $rows;
+        $this->num_rows = count($rows);
     }
+
     public function fetch_assoc() {
         return $this->rows[$this->index++] ?? null;
     }
@@ -62,16 +80,24 @@ class FakeMysqli {
     private $pdo;
     public $connect_error = null;
 
-    public function __construct($pdo) { $this->pdo = $pdo; }
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+    }
+
     public function query($sql) {
         $stmt = $this->pdo->query($sql);
-        return new FakeResult($stmt);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return new FakeResult($rows);
     }
+
     public function prepare($sql) {
         $stmt = $this->pdo->prepare($sql);
         return new FakeStatement($stmt, $this->pdo);
     }
-    public function real_escape_string($s) { return addslashes($s); }
+
+    public function real_escape_string($s) {
+        return addslashes($s);
+    }
 }
 
 $conn = new FakeMysqli($pdo);
