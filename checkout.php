@@ -101,7 +101,6 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
         </div>
         <iframe class="map-frame"
           src="https://www.google.com/maps?q=Col.%20S.%20Cruz%20St.%20San%20Rafael%20corner%20Greenrose%20Subd.%20(infront%20of%20ATF%20Builders%20Construction%20Supply)&output=embed"
-            allowfullscreen="" loading="lazy"
           allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
         </iframe>
       </div>
@@ -224,6 +223,7 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
 
   </div>
 
+  <!-- Desktop order panel (hidden on mobile via CSS) -->
   <div class="order-panel">
     <div class="card">
       <div class="card-head">
@@ -251,6 +251,39 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
     </div>
   </div>
 
+</div>
+
+<!-- Mobile: sticky pill trigger -->
+<button class="order-drawer-pill" id="orderPill" aria-expanded="false" aria-controls="orderDrawer">
+  <span>&#128722; Order Summary</span>
+  <span class="pill-total" id="pillTotal">&#8369;0.00</span>
+  <span class="pill-icon">&#8679;</span>
+</button>
+
+<!-- Mobile: backdrop -->
+<div class="order-drawer-backdrop" id="orderBackdrop"></div>
+
+<!-- Mobile: bottom drawer -->
+<div class="order-drawer" id="orderDrawer" role="dialog" aria-label="Order Summary">
+  <div class="drawer-handle-bar"></div>
+  <div class="drawer-header">
+    <span class="drawer-title">Order Summary</span>
+    <button class="drawer-close" id="drawerClose" aria-label="Close">&#10005;</button>
+  </div>
+  <div class="order-summary-items" id="drawerItems"></div>
+  <div class="order-totals">
+    <div class="total-row"><span>Subtotal</span><span id="drawerSubtotal">&#8369;0.00</span></div>
+    <?php if ($isUser): ?>
+    <div class="total-row discount" id="drawerDiscountRow">
+      <span id="drawerDiscountLabel">Member Discount (10%)</span>
+      <span id="drawerDiscountDisplay"></span>
+    </div>
+    <?php endif; ?>
+    <div class="total-row delivery" id="drawerDeliveryRow" style="display:none;"><span>Delivery Fee</span><span>&#8369;40.00</span></div>
+    <div class="total-row grand"><span>Total</span><span id="drawerTotal">&#8369;0.00</span></div>
+  </div>
+  <button class="btn-place-order" onclick="placeOrder(); closeDrawer();">Place Order &rarr;</button>
+  <p class="order-guarantee">Secure checkout &nbsp;&middot;&nbsp; No hidden fees</p>
 </div>
 
 <script>
@@ -284,20 +317,12 @@ function clearError() {
   el.classList.remove('show');
 }
 
-function renderSummary() {
-  const container = document.getElementById('summaryItems');
-  const countEl   = document.getElementById('summaryItemCount');
-  if (!cart.length) {
-    container.innerHTML = '<p style="color:var(--text-muted);font-size:13px;padding:10px 0;">Your cart is empty. <a href="menu.php" style="color:var(--gold);font-weight:700;">Go back to menu</a></p>';
-    updateTotals(0);
-    countEl.textContent = 'No items';
-    document.getElementById('placeOrderBtn').disabled = true;
-    return;
+function buildItemsHTML(cartData) {
+  if (!cartData.length) {
+    return '<p style="color:var(--text-muted);font-size:13px;padding:10px 0;">Your cart is empty. <a href="menu.php" style="color:var(--gold);font-weight:700;">Go back to menu</a></p>';
   }
-  let subtotal = 0, totalQty = 0;
-  container.innerHTML = cart.map(item => {
+  return cartData.map(item => {
     const sub = item.price * item.qty;
-    subtotal += sub; totalQty += item.qty;
     return `<div class="order-item">
       <div class="order-item-left">
         <div class="order-item-name">${item.name}</div>
@@ -309,36 +334,64 @@ function renderSummary() {
       <div class="order-item-price">\u20B1${sub.toFixed(2)}</div>
     </div>`;
   }).join('');
+}
+
+function renderSummary() {
+  const itemsHTML  = buildItemsHTML(cart);
+  const countEl    = document.getElementById('summaryItemCount');
+
+  document.getElementById('summaryItems').innerHTML = itemsHTML;
+  document.getElementById('drawerItems').innerHTML  = itemsHTML;
+
+  if (!cart.length) {
+    updateTotals(0);
+    countEl.textContent = 'No items';
+    document.getElementById('placeOrderBtn').disabled = true;
+    return;
+  }
+
+  let subtotal = 0, totalQty = 0;
+  cart.forEach(item => { subtotal += item.price * item.qty; totalQty += item.qty; });
   countEl.textContent = totalQty + (totalQty === 1 ? ' item' : ' items');
   updateTotals(subtotal);
 }
 
-// FIX 1: updateTotals — subtract discountAmount from grand total
-//         FIX 2: use subtotal * rate directly (prices are original/pre-discount)
-//         FIX 3: added id="discountRow" to HTML so show/hide works for guests
 function updateTotals(subtotal) {
-  const deliveryFee = fulfillment === 'delivery' ? 40 : 0;
-  const discountRow = document.getElementById('discountRow');
-
-  let discountAmount = 0;
+  const deliveryFee    = fulfillment === 'delivery' ? 40 : 0;
+  const discountRow    = document.getElementById('discountRow');
+  const drawerDiscRow  = document.getElementById('drawerDiscountRow');
+  let discountAmount   = 0;
 
   if (IS_MEMBER) {
     const rate         = IS_HAPPY_HOUR ? 0.20 : 0.10;
-    // FIX 2: prices are original (pre-discount), so savings = subtotal * rate directly
     discountAmount     = subtotal * rate;
     const label        = IS_HAPPY_HOUR ? 'Happy Hour (20%)' : 'Member Discount (10%)';
-    document.getElementById('discountLabel').textContent   = label;
-    document.getElementById('discountDisplay').textContent = '-\u20B1' + discountAmount.toFixed(2) + ' saved';
-    if (discountRow) discountRow.style.display = 'flex';
+    const savings      = '-\u20B1' + discountAmount.toFixed(2) + ' saved';
+
+    document.getElementById('discountLabel').textContent    = label;
+    document.getElementById('discountDisplay').textContent  = savings;
+    if (discountRow)   discountRow.style.display   = 'flex';
+
+    if (document.getElementById('drawerDiscountLabel')) {
+      document.getElementById('drawerDiscountLabel').textContent   = label;
+      document.getElementById('drawerDiscountDisplay').textContent = savings;
+    }
+    if (drawerDiscRow) drawerDiscRow.style.display = 'flex';
   } else {
-    if (discountRow) discountRow.style.display = 'none';
+    if (discountRow)   discountRow.style.display   = 'none';
+    if (drawerDiscRow) drawerDiscRow.style.display = 'none';
   }
 
-  // FIX 1: grand total now correctly subtracts discountAmount
   const grand = subtotal - discountAmount + deliveryFee;
 
-  document.getElementById('subtotalDisplay').textContent   = '\u20B1' + subtotal.toFixed(2);
-  document.getElementById('grandTotalDisplay').textContent = '\u20B1' + grand.toFixed(2);
+  document.getElementById('subtotalDisplay').textContent    = '\u20B1' + subtotal.toFixed(2);
+  document.getElementById('grandTotalDisplay').textContent  = '\u20B1' + grand.toFixed(2);
+  document.getElementById('drawerSubtotal').textContent     = '\u20B1' + subtotal.toFixed(2);
+  document.getElementById('drawerTotal').textContent        = '\u20B1' + grand.toFixed(2);
+
+  // Update pill total
+  const pillEl = document.getElementById('pillTotal');
+  if (pillEl) pillEl.textContent = '\u20B1' + grand.toFixed(2);
 }
 
 function recalcTotals() {
@@ -352,7 +405,8 @@ function setFulfillment(type) {
   document.getElementById('deliveryInfo').classList.toggle('show', type === 'delivery');
   document.getElementById('btnPickup').classList.toggle('active', type === 'pickup');
   document.getElementById('btnDelivery').classList.toggle('active', type === 'delivery');
-  document.getElementById('deliveryFeeRow').style.display = type === 'delivery' ? 'flex' : 'none';
+  document.getElementById('deliveryFeeRow').style.display  = type === 'delivery' ? 'flex' : 'none';
+  document.getElementById('drawerDeliveryRow').style.display = type === 'delivery' ? 'flex' : 'none';
   recalcTotals();
 }
 
@@ -381,12 +435,10 @@ function placeOrder() {
   const subtotal    = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const deliveryFee = fulfillment === 'delivery' ? 40 : 0;
 
-  // FIX 1 (placeOrder): compute discount and deduct from total before sending to server
   let discountRate   = 0;
   let discountAmount = 0;
   if (IS_MEMBER) {
     discountRate   = IS_HAPPY_HOUR ? 0.20 : 0.10;
-    // FIX 2: prices are original, so discountAmount = subtotal * rate directly
     discountAmount = parseFloat((subtotal * discountRate).toFixed(2));
   }
 
@@ -394,16 +446,16 @@ function placeOrder() {
 
   const payload = {
     items: cart,
-    subtotal:        parseFloat(subtotal.toFixed(2)),
-    discount_rate:   discountRate,
-    discount_amount: discountAmount,
-    delivery_fee:    deliveryFee,
-    total:           total,
+    subtotal:         parseFloat(subtotal.toFixed(2)),
+    discount_rate:    discountRate,
+    discount_amount:  discountAmount,
+    delivery_fee:     deliveryFee,
+    total:            total,
     fulfillment,
-    payment_method:  payment,
+    payment_method:   payment,
     delivery_address: deliveryAddress,
-    contact_number:  contactNumber,
-    special_notes:   specialNotes
+    contact_number:   contactNumber,
+    special_notes:    specialNotes
   };
 
   const btn = document.getElementById('placeOrderBtn');
@@ -424,6 +476,10 @@ function placeOrder() {
       localStorage.removeItem('sydCart');
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('successScreen').classList.add('show');
+      // Hide mobile drawer elements too
+      document.getElementById('orderPill').style.display     = 'none';
+      document.getElementById('orderDrawer').style.display   = 'none';
+      document.getElementById('orderBackdrop').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       showError('Something went wrong: ' + (data.message || 'Unknown error'));
@@ -440,6 +496,35 @@ function placeOrder() {
 
 renderSummary();
 
+// ── Mobile drawer logic ──
+const pill     = document.getElementById('orderPill');
+const drawer   = document.getElementById('orderDrawer');
+const backdrop = document.getElementById('orderBackdrop');
+const closeBtn = document.getElementById('drawerClose');
+
+function openDrawer() {
+  drawer.classList.add('open');
+  backdrop.classList.add('show');
+  pill.classList.add('open');
+  pill.setAttribute('aria-expanded', 'true');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+  drawer.classList.remove('open');
+  backdrop.classList.remove('show');
+  pill.classList.remove('open');
+  pill.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+
+pill.addEventListener('click', () =>
+  drawer.classList.contains('open') ? closeDrawer() : openDrawer()
+);
+backdrop.addEventListener('click', closeDrawer);
+closeBtn.addEventListener('click', closeDrawer);
+
+// ── Card preview logic ──
 function formatCardNumber(input) {
   let val = input.value.replace(/\D/g, '').substring(0, 16);
   input.value = val.replace(/(.{4})/g, '$1 ').trim();
