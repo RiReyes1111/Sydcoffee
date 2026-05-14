@@ -283,7 +283,7 @@ textarea { resize: vertical; min-height: 80px; }
   font-size: 14px; pointer-events: none; color: var(--text-muted);
 }
 
-/* ── Desktop order panel ── */
+
 .order-panel { position: sticky; top: 88px; }
 
 .order-summary-items { margin-bottom: 16px; }
@@ -360,19 +360,18 @@ textarea { resize: vertical; min-height: 80px; }
 
 .btn-back-menu:hover { background: var(--brown-mid); transform: translateY(-2px); }
 
-/* ── Mobile: bottom drawer for order summary ── */
+
 @media (max-width: 840px) {
   .checkout-layout {
     grid-template-columns: 1fr;
-    padding-bottom: 100px; /* space for the sticky pill */
+    padding-bottom: 100px; 
   }
 
-  /* Hide the inline order panel on mobile */
+  
   .order-panel {
     display: none;
   }
 
-  /* Sticky pill at the bottom that toggles the drawer */
   .order-drawer-pill {
     display: flex;
     position: fixed;
@@ -409,7 +408,7 @@ textarea { resize: vertical; min-height: 80px; }
     transform: rotate(180deg);
   }
 
-  /* Backdrop overlay */
+
   .order-drawer-backdrop {
     display: none;
     position: fixed;
@@ -422,7 +421,7 @@ textarea { resize: vertical; min-height: 80px; }
 
   .order-drawer-backdrop.show { display: block; }
 
-  /* The drawer itself */
+ 
   .order-drawer {
     position: fixed;
     bottom: 0;
@@ -444,7 +443,7 @@ textarea { resize: vertical; min-height: 80px; }
     transform: translateY(0);
   }
 
-  /* Drag handle */
+
   .drawer-handle-bar {
     width: 44px;
     height: 5px;
@@ -480,7 +479,7 @@ textarea { resize: vertical; min-height: 80px; }
   .drawer-close:hover { background: var(--cream-dark); color: var(--espresso); }
 }
 
-/* Hide the pill and drawer on desktop */
+
 @media (min-width: 841px) {
   .order-drawer-pill,
   .order-drawer-backdrop,

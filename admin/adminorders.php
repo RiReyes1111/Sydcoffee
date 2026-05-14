@@ -14,7 +14,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// Tell MySQL to use PH time for this session
+
 $conn->query("SET time_zone = '+08:00'");
 
 if (isset($_POST['update_status'])) {
@@ -45,7 +45,7 @@ if (isset($_POST['empty_bin'])) {
     header("Location: adminorders.php"); exit();
 }
 
-// Helper: format any datetime string as PH time
+
 function phTime($datetime, $format = 'M j, Y g:i A') {
     if (empty($datetime)) return '';
     $dt = new DateTime($datetime, new DateTimeZone('Asia/Manila'));
@@ -207,26 +207,104 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
 .sidebar-overlay.show{display:block;}
 
 @media(max-width:768px){
-    .sidebar{transform:translateX(-100%);}
-    .sidebar.open{transform:translateX(0);}
-    .main{margin-left:0;}
-    .menu-toggle{display:block;}
-    .content{padding:20px 16px;}
-    .topbar{padding:14px 16px;}
-    .order-customer{margin-left:0;width:100%;}
-    .topbar-right{gap:6px;}
+    .sidebar{
+        transform:translateX(-100%);
+    }
 
-    
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .main{
+        margin-left:0;
+    }
+
+    .menu-toggle{
+        display:block;
+    }
+
+    .content{
+        padding:20px 16px;
+    }
+
+    .topbar{
+        padding:14px 16px;
+    }
+
+    .topbar-right{
+        gap:6px;
+    }
+
+    .order-head{
+        align-items:flex-start;
+    }
+
+    .order-customer{
+        margin-left:0;
+        width:100%;
+    }
+
+    .order-body{
+        flex-direction:column;
+    }
+
+    .order-meta{
+        min-width:100%;
+    }
+
     .order-foot{
-        align-items:center;
+        display:flex;
+        flex-direction:column;
+        align-items:stretch;
+        gap:12px;
+    }
+
+    .order-foot .foot-label{
+        margin-bottom:-4px;
     }
 
     .order-foot form{
-        margin:0;
+        width:100%;
+        margin:0 !important;
     }
 
-    .order-foot form:last-child{
-        margin-left:auto !important;
+    .order-foot form:first-of-type{
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+        align-items:stretch !important;
+    }
+
+    .status-select{
+        width:100%;
+    }
+
+    .btn-update-status,
+    .btn-delete-order,
+    .btn-restore,
+    .btn-force{
+        width:100%;
+        justify-content:center;
+    }
+
+    .btn-update-status{
+        padding:10px 18px;
+    }
+
+    .btn-delete-order,
+    .btn-restore,
+    .btn-force{
+        padding:10px 14px;
+    }
+
+    .bin-head{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .bin-head-right{
+        width:100%;
+        justify-content:space-between;
     }
 }
 </style>
@@ -306,7 +384,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
         while ($order = $orders->fetch_assoc()):
             $hasOrders = true;
             $items = json_decode($order['items_json'], true) ?: [];
-            // Use DateTime with explicit PH timezone for "is new" check and display
+            
             $createdDt = new DateTime($order['created_at'], $phTz);
             $nowDt     = new DateTime('now', $phTz);
             $isNew     = ($nowDt->getTimestamp() - $createdDt->getTimestamp()) < 300 && $order['status'] === 'pending';
