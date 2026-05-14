@@ -18,8 +18,11 @@ try {
 
 class FakeStatement {
     private $stmt;
+    private $pdo;
     private $params = [];
     public $insert_id = 0;
+    public $num_rows = 0;
+
     public function __construct($stmt, $pdo) { 
         $this->stmt = $stmt; 
         $this->pdo = $pdo;
@@ -39,13 +42,13 @@ class FakeStatement {
     public function get_result() { return new FakeResult($this->stmt); }
     public function store_result() { return true; }
     public function num_rows() { return $this->stmt->rowCount(); }
-    public $num_rows = 0;
 }
 
 class FakeResult {
     private $rows = [];
     private $index = 0;
     public $num_rows = 0;
+
     public function __construct($stmt) {
         $this->rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $this->num_rows = count($this->rows);
@@ -58,6 +61,7 @@ class FakeResult {
 class FakeMysqli {
     private $pdo;
     public $connect_error = null;
+
     public function __construct($pdo) { $this->pdo = $pdo; }
     public function query($sql) {
         $stmt = $this->pdo->query($sql);
