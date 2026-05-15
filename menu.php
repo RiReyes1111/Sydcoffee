@@ -15,7 +15,7 @@
   $isAdmin = ($loggedIn && $userRole === 'admin');
 
   $currentHour = (int)date('H');
-  $isHappyHour = ($currentHour >= 9 && $currentHour < 11);
+  $isHappyHour = ($currentHour >= 8 && $currentHour < 11);
 
   $discount     = 0.10;
   $coldDiscount = ($isUser && $isHappyHour) ? 0.20 : ($isUser ? 0.10 : 0);
