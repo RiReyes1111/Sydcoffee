@@ -232,6 +232,8 @@ if (isset($_POST['register'])) {
   </div>
 
 </div>
+  
+  <a href="index.php" class="go-back-btn">← Go Back</a>
 
 <script>
 function switchTab(tab) {
