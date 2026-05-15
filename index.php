@@ -117,8 +117,8 @@ $userName = $loggedIn ? $_SESSION['name'] : '';
     <a href="<?= $loggedIn ? 'menu.php' : 'login.php' ?>" class="promo-link reveal delay-1">
       <div class="promo-card">
         <div class="promo-badge">Limited Time</div>
-        <h3>Happy Hour Student Rush</h3>
-        <p class="promo-when">9AM – 11AM Daily</p>
+        <h3>Happy Hour Morning Rush</h3>
+        <p class="promo-when">6AM – 10AM Daily</p>
         <p class="promo-desc">Extra 10% off all cold drinks during happy hour — 20% total for members!</p>
       </div>
     </a>
