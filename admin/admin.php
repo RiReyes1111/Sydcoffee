@@ -183,6 +183,8 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
     .banner-actions{display:none;}
 }
 @media(max-width:540px){.stats-grid{grid-template-columns:1fr;}}
+    
+    
 </style>
 </head>
 <body>
@@ -352,7 +354,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--tex
         </div>
     </div>
 </div>
-
+    
 <script>
 function updateClock(){
     const now=new Date(),pad=v=>String(v).padStart(2,'0'),el=document.getElementById('liveClock');

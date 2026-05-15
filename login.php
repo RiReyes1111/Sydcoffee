@@ -15,7 +15,7 @@ $safeRedirect = ($redirect === 'checkout')  ? 'checkout.php'       : 'menu.php';
 
 $defaultTab = isset($_GET['tab']) && $_GET['tab'] === 'register' ? 'register' : 'login';
 
-// ---- LOGIN ----
+
 if (isset($_POST['login'])) {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
@@ -46,7 +46,7 @@ if (isset($_POST['login'])) {
     }
 }
 
-// ---- REGISTER ----
+
 if (isset($_POST['register'])) {
     $name     = trim($_POST['reg_name']);
     $email    = trim($_POST['reg_email']);
@@ -171,7 +171,7 @@ if (isset($_POST['register'])) {
     <div class="alert alert-success">✓ <?= htmlspecialchars($success) ?></div>
   <?php endif; ?>
 
-  <!-- LOGIN PANEL -->
+
   <div class="form-panel <?= $defaultTab === 'login' ? 'active' : '' ?>" id="panel-login">
     <div class="form-header">
       <h2>Welcome back.</h2>

@@ -223,7 +223,7 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
 
   </div>
 
-  <!-- Desktop order panel (hidden on mobile via CSS) -->
+  
   <div class="order-panel">
     <div class="card">
       <div class="card-head">
@@ -253,17 +253,16 @@ $isHappyHour = ($currentHour >= 15 && $currentHour < 17);
 
 </div>
 
-<!-- Mobile: sticky pill trigger -->
+
 <button class="order-drawer-pill" id="orderPill" aria-expanded="false" aria-controls="orderDrawer">
   <span>&#128722; Order Summary</span>
   <span class="pill-total" id="pillTotal">&#8369;0.00</span>
   <span class="pill-icon">&#8679;</span>
 </button>
 
-<!-- Mobile: backdrop -->
+
 <div class="order-drawer-backdrop" id="orderBackdrop"></div>
 
-<!-- Mobile: bottom drawer -->
 <div class="order-drawer" id="orderDrawer" role="dialog" aria-label="Order Summary">
   <div class="drawer-handle-bar"></div>
   <div class="drawer-header">
@@ -389,7 +388,7 @@ function updateTotals(subtotal) {
   document.getElementById('drawerSubtotal').textContent     = '\u20B1' + subtotal.toFixed(2);
   document.getElementById('drawerTotal').textContent        = '\u20B1' + grand.toFixed(2);
 
-  // Update pill total
+ 
   const pillEl = document.getElementById('pillTotal');
   if (pillEl) pillEl.textContent = '\u20B1' + grand.toFixed(2);
 }
@@ -496,7 +495,7 @@ function placeOrder() {
 
 renderSummary();
 
-// ── Mobile drawer logic ──
+
 const pill     = document.getElementById('orderPill');
 const drawer   = document.getElementById('orderDrawer');
 const backdrop = document.getElementById('orderBackdrop');

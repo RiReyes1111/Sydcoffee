@@ -455,6 +455,11 @@ img { display: block; max-width: 100%; }
   white-space: nowrap;
 }
 
+.bs-card:nth-child(3) .bs-tag {
+  background: #5b8c3a;
+  color: #fff;
+}
+
 .bs-card.featured .bs-tag {
   background: var(--gold);
   color: var(--espresso);
