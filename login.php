@@ -148,6 +148,21 @@ if (isset($_POST['register'])) {
     color: #9a7a5a;
     margin-top: 4px;
 }
+  .go-back-btn{
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #4a3020;
+    color: white;
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    z-index: 9999;
+    transition: 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
 </style>
 </head>
 <body>
